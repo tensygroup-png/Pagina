@@ -1,0 +1,361 @@
+{% schema %}
+{
+  "name": "Custom Collection Page",
+  "settings": [
+    {
+      "type": "collection",
+      "id": "collection",
+      "label": "Select a Collection"
+    },
+    {
+      "type": "text",
+      "id": "header_title",
+      "label": "Header Title",
+      "default": "Our Collection"
+    },
+    {
+      "type": "color",
+      "id": "header_title_color",
+      "label": "Header Title Color",
+      "default": "#333333"
+    },
+    {
+      "type": "range",
+      "id": "header_title_font_size",
+      "label": "Header Title Font Size",
+      "default": 24,
+      "min": 16,
+      "max": 48,
+      "step": 1,
+      "unit": "px"
+    },
+    {
+      "type": "select",
+      "id": "image_aspect_ratio",
+      "label": "Image Aspect Ratio",
+      "options": [
+        {
+          "value": "portrait",
+          "label": "Portrait (2:3)"
+        },
+        {
+          "value": "square",
+          "label": "Square (1:1)"
+        },
+        {
+          "value": "adapt",
+          "label": "Adapt to Image"
+        }
+      ],
+      "default": "portrait"
+    },
+    {
+      "type": "range",
+      "id": "rows_on_desktop",
+      "label": "Rows on Desktop",
+      "default": 2,
+      "min": 1,
+      "max": 4,
+      "step": 1
+    },
+    {
+      "type": "range",
+      "id": "rows_on_mobile",
+      "label": "Rows on Mobile",
+      "default": 2,
+      "min": 1,
+      "max": 4,
+      "step": 1
+    },
+    {
+      "type": "checkbox",
+      "id": "show_filters",
+      "label": "Show Filters",
+      "default": true
+    },
+    {
+      "type": "checkbox",
+      "id": "enable_sorting",
+      "label": "Enable Sorting",
+      "default": true
+    },
+    {
+      "type": "checkbox",
+      "id": "show_sale_badge",
+      "label": "Show Sale Badge",
+      "default": true
+    },
+    {
+      "type": "color",
+      "id": "sale_badge_background",
+      "label": "Sale Badge Background Color",
+      "default": "#e60023"
+    },
+    {
+      "type": "color",
+      "id": "sale_badge_text_color",
+      "label": "Sale Badge Text Color",
+      "default": "#ffffff"
+    },
+    {
+      "type": "range",
+      "id": "sale_badge_font_size",
+      "label": "Sale Badge Font Size",
+      "default": 12,
+      "min": 8,
+      "max": 24,
+      "step": 1,
+      "unit": "px"
+    },
+    {
+      "type": "range",
+      "id": "sale_badge_padding",
+      "label": "Sale Badge Padding",
+      "default": 5,
+      "min": 2,
+      "max": 15,
+      "step": 1,
+      "unit": "px"
+    },
+    {
+      "type": "range",
+      "id": "product_title_font_size",
+      "label": "Product Title Font Size",
+      "default": 16,
+      "min": 12,
+      "max": 24,
+      "step": 1,
+      "unit": "px"
+    },
+    {
+      "type": "color",
+      "id": "product_title_color",
+      "label": "Product Title Color",
+      "default": "#333333"
+    },
+    {
+      "type": "checkbox",
+      "id": "product_title_underline",
+      "label": "Underline Product Title",
+      "default": false
+    },
+    {
+      "type": "range",
+      "id": "product_price_font_size",
+      "label": "Product Price Font Size",
+      "default": 14,
+      "min": 12,
+      "max": 24,
+      "step": 1,
+      "unit": "px"
+    },
+    {
+      "type": "range",
+      "id": "compare_price_font_size",
+      "label": "Compare Price Font Size",
+      "default": 14,
+      "min": 12,
+      "max": 24,
+      "step": 1,
+      "unit": "px"
+    },
+    {
+      "type": "color",
+      "id": "product_price_color",
+      "label": "Product Price Color",
+      "default": "#e60023"
+    },
+    {
+      "type": "color",
+      "id": "compare_price_color",
+      "label": "Compare Price Color",
+      "default": "#999999"
+    },
+    {
+      "type": "checkbox",
+      "id": "compare_price_strikethrough",
+      "label": "Strikethrough Compare Price",
+      "default": true
+    }
+  ],
+  "presets": [
+    {
+      "name": "Custom Collection Page",
+      "category": "Pages"
+    }
+  ]
+}
+{% endschema %}
+
+<section class="custom-collection">
+  <header class="collection-header">
+    <h1 style="color: {{ section.settings.header_title_color }}; font-size: {{ section.settings.header_title_font_size }}px;">
+      {{ section.settings.header_title }}
+    </h1>
+    {% if collection.description != blank %}
+      <p class="collection-description">{{ collection.description }}</p>
+    {% endif %}
+  </header>
+
+  {% if section.settings.collection %}
+    {% assign collection_to_show = collections[section.settings.collection] %}
+
+    {% if collection_to_show.products.size > 0 %}
+    <div class="collection-grid" style="
+      --rows-on-desktop: {{ section.settings.rows_on_desktop }};
+      --rows-on-mobile: {{ section.settings.rows_on_mobile }};
+    ">
+      {% for product in collection_to_show.products %}
+        <article class="product-item">
+          <a href="{{ product.url }}" class="product-link" style="text-decoration: none;">
+            <div class="product-image-container" style="
+              {% if section.settings.image_aspect_ratio == 'portrait' %}
+                aspect-ratio: 2 / 3;
+              {% elsif section.settings.image_aspect_ratio == 'square' %}
+                aspect-ratio: 1 / 1;
+              {% else %}
+                height: auto;
+              {% endif %}
+            ">
+              {% if section.settings.show_sale_badge and product.compare_at_price > product.price %}
+                <span class="product-badge" style="
+                  background-color: {{ section.settings.sale_badge_background }};
+                  color: {{ section.settings.sale_badge_text_color }};
+                  font-size: {{ section.settings.sale_badge_font_size }}px;
+                  padding: {{ section.settings.sale_badge_padding }}px;
+                ">
+                  Save {{ product.compare_at_price | minus: product.price | money }}
+                </span>
+              {% endif %}
+              <img class="product-image" src="{{ product.featured_image | img_url: '600x600' }}" alt="{{ product.title }}">
+            </div>
+            <div class="product-details">
+              <h2 class="product-title" style="
+                font-size: {{ section.settings.product_title_font_size }}px;
+                color: {{ section.settings.product_title_color }};
+              ">
+                {{ product.title }}
+              </h2>
+              <p class="product-price" style="font-size: {{ section.settings.product_price_font_size }}px; color: {{ section.settings.product_price_color }};">
+                {% if product.compare_at_price > product.price %}
+                  <span class="original-price" style="
+                    font-size: {{ section.settings.compare_price_font_size }}px;
+                    color: {{ section.settings.compare_price_color }};
+                    {% if section.settings.compare_price_strikethrough %}
+                      text-decoration: line-through;
+                    {% endif %}
+                  ">
+                    {{ product.compare_at_price | money }}
+                  </span>
+                {% endif %}
+                <span class="current-price">{{ product.price | money }}</span>
+              </p>
+            </div>
+          </a>
+        </article>
+      {% endfor %}
+    </div>
+    {% else %}
+      <p class="no-products">No products found in this collection.</p>
+    {% endif %}
+  {% else %}
+    <p class="no-products">Please select a collection in the section settings.</p>
+  {% endif %}
+</section>
+
+<style>
+  .custom-collection {
+    padding: 20px;
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+
+  .collection-header h1 {
+    text-align: center;
+    margin-bottom: 20px;
+  }
+
+  .collection-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); /* Default for larger screens */
+    gap: 20px;
+  }
+
+  @media (min-width: 768px) {
+    .collection-grid {
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); /* Ensures proper scaling on tablets and desktops */
+    }
+  }
+
+  @media (max-width: 767px) {
+    .collection-grid {
+      grid-template-columns: repeat(2, 1fr); /* Explicitly set 2 columns for mobile */
+    }
+  }
+
+  .product-item {
+    background: #fff;
+    overflow: hidden;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+  }
+
+  .product-item:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.15);
+  }
+
+  .product-image-container {
+    position: relative;
+    width: 100%;
+    overflow: hidden;
+  }
+
+  .product-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.3s ease;
+  }
+
+  .product-item:hover .product-image {
+    transform: scale(1.05);
+  }
+
+  .product-badge {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    font-size: 0.8rem;
+    font-weight: bold;
+    text-transform: uppercase;
+    padding: 5px 10px;
+    border-radius: 3px;
+  }
+
+  .product-link {
+    text-decoration: none; /* Removes underline from links */
+  }
+
+  .product-details {
+    padding: 15px;
+    text-align: center;
+  }
+
+  .product-title {
+    font-size: 1rem;
+    margin-bottom: 8px;
+    font-weight: 600;
+  }
+
+  .product-price {
+    font-size: 1rem;
+    font-weight: bold;
+    color: #e60023;
+  }
+
+  .original-price {
+    margin-right: 5px;
+    text-decoration: line-through;
+    font-size: 14px;
+  }
+</style>

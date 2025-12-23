@@ -1,0 +1,183 @@
+{% comment %}
+    <div id="cart-timer" class="cart-timer" style="
+      background-color: {{ settings.timer_background_color }};
+      color: {{ settings.timer_text_color }};
+      padding-top:
+      {%- if settings.enable_overflow -%}
+        15px;
+      {%- else -%}
+        {{ settings.timer_padding_top }}px;
+      {%- endif -%};
+      padding-bottom:
+      {%- if settings.enable_overflow -%}
+        15px;
+      {%- else -%}
+        {{ settings.timer_padding_bottom }}px;
+      {%- endif -%};
+      padding-left:
+      {%- if settings.enable_overflow -%}
+        0px;
+      {%- else -%}
+        {{ settings.timer_padding_left }}px;
+      {%- endif -%};
+      padding-right:
+      {%- if settings.enable_overflow -%}
+        0px;
+      {%- else -%}
+        {{ settings.timer_padding_right }}px;
+      {%- endif -%};
+      text-align: center;
+      font-size:
+      {%- case settings.font_size_preset -%}
+        {%- when 'small' -%} 14px;
+        {%- when 'medium' -%} 16px;
+        {%- when 'large' -%} 18px;
+        {%- when 'extra-large' -%} 20px;
+        {%- else -%} 16px;
+      {%- endcase -%};
+      font-weight: bold;
+      display: flex;
+      flex-direction:
+      {%- if settings.timer_layout == 'above' -%}
+        column;
+      {%- else -%}
+        row;
+      {%- endif -%};
+      align-items: center;
+      justify-content: center;
+      width:
+      {%- if settings.enable_overflow -%}
+        100vw;
+      {%- else -%}
+        calc(100% - {{ settings.timer_padding_left | times: 2 }}px);
+      {%- endif -%};
+      position:
+      {%- if settings.enable_overflow -%}
+        relative;
+      {%- else -%}
+        static;
+      {%- endif -%};
+      left:
+      {%- if settings.enable_overflow -%}
+        50%;
+      {%- else -%}
+        auto;
+      {%- endif -%};
+      transform:
+      {%- if settings.enable_overflow -%}
+        translateX(-50%);
+      {%- else -%}
+        none;
+      {%- endif -%};
+      box-sizing: border-box;
+      border-radius: {{ settings.corner_radius }}px;
+      margin: auto;
+      overflow: hidden;
+  ">
+    {%- if settings.timer_layout == 'above' -%}
+      <span id="timer" style="margin-bottom: 5px;"></span>
+      <span>Cart reserved for</span>
+    {%- else -%}
+      <span>Cart reserved for <span id="timer"></span></span>
+    {%- endif -%}
+  </div>
+{% endcomment %}
+
+<style>
+  /* General Cart Timer Styling */
+  #cart-timer {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    line-height: 1.5;
+    box-sizing: border-box;
+    margin: 0 auto;
+    overflow: hidden;
+    font-weight: bold;
+  }
+
+  #cart-timer span#timer {
+    font-weight: bold;
+  }
+
+  /* Full-Width Styling for Enable Overflow */
+  .cart-timer.full-width {
+    position: absolute; /* Fixed position in the drawer */
+    top: 0;
+    left: 0;
+    width: 100%; /* Full width of the screen or container */
+    z-index: 9999;
+    padding: 15px 0;
+    text-align: center;
+    background-color: inherit;
+    color: inherit;
+    border-radius: 0; /* Optional: Set border-radius to match the drawer */
+  }
+
+  /* Default Styling for Normal Layout */
+  .cart-timer.normal {
+    position: relative;
+    width: 100%;
+    background-color: {{ settings.timer_background_color }};
+    color: {{ settings.timer_text_color }};
+    padding: 15px;
+  }
+
+</style>
+
+<div
+  id="cart-timer"
+  class="cart-timer {%- if settings.enable_overflow -%} full-width {%- else -%} normal {%- endif -%}"
+  style="
+    background-color: {{ settings.timer_background_color }};
+    color: {{ settings.timer_text_color }};
+    padding: 
+      {%- if settings.enable_overflow -%}
+        15px 0;
+      {%- else -%}
+        {{ settings.timer_padding_top }}px {{ settings.timer_padding_right }}px {{ settings.timer_padding_bottom }}px {{ settings.timer_padding_left }}px;
+      {%- endif -%};
+    font-size: 
+      {%- case settings.font_size_preset -%}
+        {%- when 'small' -%} 14px;
+        {%- when 'medium' -%} 16px;
+        {%- when 'large' -%} 18px;
+        {%- when 'extra-large' -%} 20px;
+        {%- else -%} 16px;
+      {%- endcase -%};
+    border-radius: {{ settings.corner_radius }}px;
+    position: 
+      {%- if settings.enable_overflow -%}
+        absolute;
+      {%- else -%}
+        relative;
+      {%- endif -%};
+    top: 
+      {%- if settings.enable_overflow -%}
+        0;
+      {%- else -%}
+        auto;
+      {%- endif -%};
+    left: 
+      {%- if settings.enable_overflow -%}
+        0;
+      {%- else -%}
+        auto;
+      {%- endif -%};
+    width: 
+      {%- if settings.enable_overflow -%}
+        100%;
+      {%- else -%}
+        auto;
+      {%- endif -%};
+    z-index: 9999;
+  "
+>
+  {% if settings.timer_layout == 'above' %}
+    <span id="timer" style="margin-bottom: 5px;"></span>
+    <span>Cart reserved for</span>
+  {% else %}
+    <span>Cart reserved for <span id="timer"></span></span>
+  {% endif %}
+</div>

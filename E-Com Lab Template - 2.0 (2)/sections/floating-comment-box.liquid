@@ -1,0 +1,249 @@
+{% comment %}
+  Floating Comment Boxes Section
+{% endcomment %}
+
+<style>
+  :root {
+    --background-color: {{ section.settings.background_color }};
+    --box-background-color: {{ section.settings.box_background_color }};
+    --box-shadow-color: rgba(0, 0, 0, 0.1);
+    --box-radius: 15px;
+    --padding: 15px;
+    --box-width: 300px;
+    --font-family: Arial, sans-serif;
+    --heading-color: #000000;
+    --subheading-color: gray;
+    --text-color: #333;
+    --hover-border-color: rgb(125, 124, 124);
+    --border-color: #e0e0e0;
+    --button-color: gray;
+    --button-hover-color: black;
+    --animation-duration: {{ section.settings.animation_duration }}s;
+    --animation-intensity: {{ section.settings.animation_intensity }}px;
+  }
+
+  .float-animation-container {
+    overflow-x: auto;
+    white-space: nowrap;
+    max-width: 1280px;
+    margin: 0 auto;
+    padding: 10px;
+  }
+
+  .float-animation-container::-webkit-scrollbar {
+    display: none;
+  }
+
+  .comment-box {
+    display: inline-block;
+    background-color: var(--box-background-color);
+    border-radius: var(--box-radius);
+    padding: var(--padding);
+    width: var(--box-width);
+    max-width: 90%;
+    box-shadow: 0 0 10px var(--box-shadow-color);
+    margin-right: 10px;
+    vertical-align: top;
+    white-space: normal;
+    animation: floatAnimation var(--animation-duration) ease-in-out infinite;
+  }
+
+  /* Animation */
+  @keyframes floatAnimation {
+    0% {
+      transform: translateY(0);
+    }
+    50% {
+      transform: translateY(calc(-1 * var(--animation-intensity)));
+    }
+    100% {
+      transform: translateY(0);
+    }
+  }
+
+  .profile-info {
+    display: flex;
+    align-items: center;
+  }
+
+  .profile-img {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    margin-right: 10px;
+  }
+
+  .profile-name {
+    font-weight: bold;
+    font-size: 16px;
+    color: var(--heading-color);
+  }
+
+  .profile-time {
+    color: var(--subheading-color);
+    font-size: 12px;
+  }
+
+  .comment-text {
+    margin-top: 10px;
+    font-size: 14px;
+    line-height: 1.5;
+    color: var(--text-color);
+  }
+
+  .reactions {
+    display: flex;
+    align-items: center;
+    margin-top: 10px;
+  }
+
+  .reactions span {
+    font-size: 16px;
+    margin-left: 5px; /* Adjusted margin for better spacing */
+  }
+
+  .reaction-count {
+    font-size: 14px;
+    margin-left: 10px; /* Adjusted spacing between emojis and reaction count */
+  }
+
+  .comment-section-footer {
+    border-top: 1px solid var(--border-color);
+    margin-top: 10px;
+    padding-top: 10px;
+    display: flex;
+    justify-content: space-between;
+    font-size: 14px;
+    color: var(--button-color);
+  }
+
+  .comment-section-footer div:hover {
+    color: var(--button-hover-color);
+    cursor: pointer;
+  }
+</style>
+
+<div class="float-animation-container">
+  {% for comment in section.blocks %}
+  <div class="comment-box" style="animation-delay: {{ comment.settings.animation_delay }}s;">
+    <div class="profile-info">
+      <img src="{{ comment.settings.profile_image | img_url: '50x50' }}" alt="Profile Picture" class="profile-img">
+      <div>
+        <div class="profile-name">{{ comment.settings.profile_name }}</div>
+        <div class="profile-time">{{ comment.settings.time_ago }}</div>
+      </div>
+    </div>
+    <div class="comment-text">
+      {{ comment.settings.comment_text }}
+    </div>
+    <div class="reactions">
+      <span>👍</span>
+      <span>❤️</span>
+      <span>🥰</span>
+      <span class="reaction-count">{{ comment.settings.reaction_count }}</span>
+      <div style="font-size: 14px; margin-left: auto;">{{ comment.settings.comment_count }} Comments</div>
+    </div>
+    <div class="comment-section-footer">
+      <div>Like</div>
+      <div>Comment</div>
+      <div>Share</div>
+    </div>
+  </div>
+  {% endfor %}
+</div>
+
+{% schema %}
+{
+  "name": "Floating Comment Boxes",
+  "settings": [
+    {
+      "type": "color",
+      "id": "background_color",
+      "label": "Background Color",
+      "default": "#f0f2f5"
+    },
+    {
+      "type": "color",
+      "id": "box_background_color",
+      "label": "Box Background Color",
+      "default": "#ffffff"
+    },
+    {
+      "type": "range",
+      "id": "animation_duration",
+      "label": "Animation Duration (seconds)",
+      "min": 2,
+      "max": 10,
+      "step": 1,
+      "default": 4
+    },
+    {
+      "type": "range",
+      "id": "animation_intensity",
+      "label": "Animation Intensity (pixels)",
+      "min": 5,
+      "max": 30,
+      "step": 1,
+      "default": 10
+    }
+  ],
+  "blocks": [
+    {
+      "type": "comment",
+      "name": "Comment Box",
+      "settings": [
+        {
+          "type": "image_picker",
+          "id": "profile_image",
+          "label": "Profile Image"
+        },
+        {
+          "type": "text",
+          "id": "profile_name",
+          "label": "Profile Name",
+          "default": "John Doe"
+        },
+        {
+          "type": "text",
+          "id": "time_ago",
+          "label": "Time Ago",
+          "default": "5h ago"
+        },
+        {
+          "type": "textarea",
+          "id": "comment_text",
+          "label": "Comment Text",
+          "default": "This is a sample comment text."
+        },
+        {
+          "type": "number",
+          "id": "reaction_count",
+          "label": "Reaction Count",
+          "default": 99
+        },
+        {
+          "type": "number",
+          "id": "comment_count",
+          "label": "Comment Count",
+          "default": 24
+        },
+        {
+          "type": "range",
+          "id": "animation_delay",
+          "label": "Animation Delay (seconds)",
+          "min": 0,
+          "max": 5,
+          "step": 0.5,
+          "default": 0
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Floating Comment Boxes",
+      "category": "Custom Sections"
+    }
+  ]
+}
+{% endschema %}

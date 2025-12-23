@@ -1,0 +1,595 @@
+{% comment %}
+  © Sections Pro. You are free to use this section in your store. You may not redistribute this section in another Shopify app.
+{% endcomment %}
+<style>
+
+  {% if section.settings.override_fonts %}
+    {{ section.settings.text_font | font_face }}
+  {% endif %}
+
+  #sp-{{ section.id }} p {
+    font-size: {{ section.settings.text_size }}px;
+    {% if section.settings.override_fonts %}
+    font-family: {{ section.settings.text_font.family }}, {{ section.settings.text_font.fallback_families }};
+    font-weight: {{ section.settings.text_font.weight }};
+    {% endif %}
+    line-height: 1.0;
+    color: {{ section.settings.text_color }};
+  }
+
+  {% assign image_height = section.settings.height | times: 3 %}
+
+  /* Container styling */
+  .combined-section {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    align-items: flex-start;
+    background-color: {{ section.settings.background_color }};
+    padding: 40px;
+    border-radius: 8px;
+    max-width: 1000px;
+    margin: 0 auto;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  }
+/* Pause marquee on hover */
+#sp-{{ section.id }} .sp-container:hover .sp-grid {
+  animation-play-state: paused;
+}
+
+  /* Marquee section styling */
+  .sp-container {
+    flex: 1;
+    position: relative;
+    margin-right: 20px;
+    max-width: 48%;
+    overflow: hidden;
+  }
+
+  .sp-grid {
+    width: fit-content;
+    align-items: center;
+    display: flex;
+    position: relative;
+    animation: marquee {{ section.settings.slideshow_speed }} linear infinite;
+    will-change: transform;
+  }
+
+  #sp-{{ section.id }} .sp-item {
+    display: inline-block;
+    margin-right: {{ section.settings.slideshow_spacing }}px;
+  }
+
+  #sp-{{ section.id }} .sp-item img {
+    display: inline-block;
+    height: {{ section.settings.height }}px;
+    {% if section.settings.media_aspect_ratio != "auto" %}object-fit: cover;{% endif %}
+    aspect-ratio: {{ section.settings.media_aspect_ratio }};
+    border-radius: {{ section.settings.media_radius }}px;
+    {% if section.settings.media_shadow %}box-shadow: 0 0 5px 0 rgba(0,0,0,0.20);{% endif %}
+    transition: all .5s;
+  }
+
+  #sp-{{ section.id }} .sp-item video {
+    display: inline-block;
+    height: {{ section.settings.height }}px;
+    object-fit: cover;
+    aspect-ratio: {{ section.settings.media_aspect_ratio }};
+    border-radius: {{ section.settings.media_radius }}px;
+    {% if section.settings.media_shadow %}box-shadow: 0 0 5px 0 rgba(0,0,0,0.20);{% endif %}
+    transition: all .5s;
+  }
+
+  @keyframes marquee {
+    to {
+      transform: translateX(-50%);
+    }
+  }
+
+  /* Result block styling */
+  .results-section {
+    flex: 1;
+    max-width: 48%;
+  }
+
+  .results-section h2 {
+    font-size: 28px;
+    font-weight: bold;
+    color: {{ section.settings.title_color }};
+    display: flex;
+    align-items: center;
+    margin-bottom: 30px;
+  }
+
+  .results-section h2 .heart-icon {
+    margin-left: 10px;
+    font-size: 32px;
+    color: {{ section.settings.icon_color }};
+  }
+
+  .result-item {
+    display: flex;
+    align-items: center;
+    margin-bottom: 30px;
+    justify-content: space-between;
+    padding-bottom: 15px;
+    border-bottom: 1px solid #e0e0e0;
+  }
+
+  .progress-circle {
+    border-radius: 50%;
+    background-color: #f3f3f3;
+    position: relative;
+    display: inline-flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 18px;
+    color: {{ section.settings.progress_text_color }};
+    font-weight: bold;
+    margin-right: 20px;
+    flex-shrink: 0;
+  }
+
+  .progress-circle svg {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    transform: rotate(-90deg);
+  }
+
+  .progress-circle circle {
+    fill: none;
+    stroke-width: 10;
+    stroke-linecap: round;
+  }
+
+  .progress-circle .progress-background {
+    stroke: #e6e6e6;
+  }
+
+  .progress-circle .progress-bar {
+    stroke: {{ section.settings.progress_color }};
+    transition: stroke-dashoffset 1s;
+  }
+
+  .result-text {
+    font-size: 16px;
+    color: {{ section.settings.text_color }};
+    flex-grow: 1;
+    line-height: 1.5;
+  }
+
+  .claim-button {
+    background-color: {{ section.settings.button_background_color }};
+    color: #fff;
+    font-size: 16px;
+    padding: 10px 20px;
+    border-radius: 6px;
+    text-decoration: none;
+    font-weight: bold;
+    display: inline-block;
+    margin-top: 20px;
+    transition: background-color 0.3s;
+  }
+
+  .claim-button:hover {
+    background-color: darken({{ section.settings.button_background_color }}, 10%);
+  }
+
+  .rating-section {
+    margin-top: 20px;
+    font-size: 14px;
+    color: #666;
+  }
+
+  .rating-section .stars {
+    color: #ffc107;
+    margin-right: 5px;
+  }
+
+  .rating-section .rating-number {
+    font-weight: bold;
+  }
+
+  .rating-section .review-count {
+    color: #333;
+  }
+
+  /* Mobile styling */
+  @media (max-width: 768px) {
+    .combined-section {
+      flex-direction: column;
+    }
+
+    .sp-container,
+    .results-section {
+      max-width: 100%;
+      margin-right: 0;
+    }
+
+    .sp-item {
+      margin-bottom: 10px;
+    }
+
+    .result-item {
+      flex-direction: column;
+      align-items: flex-start;
+    }
+
+    .progress-circle {
+      margin-bottom: 10px;
+    }
+
+    .claim-button {
+      width: 100%;
+      text-align: center;
+    }
+  }
+</style>
+
+<div class="combined-section">
+  <!-- Marquee Section -->
+  <div id="sp-{{ section.id }}" class="sp-section sp-container">
+
+    <div class="sp-grid">
+      {% for block in section.blocks %}
+        {% if block.type == 'image' or block.type == 'video' %}
+          <div class="sp-item">
+            {% if block.type == 'video' %}
+              {% if block.settings.link %}
+                <a href="{{ block.settings.link }}">
+              {% endif %}
+                {{
+                  block.settings.video
+                  | video_tag:
+                    image_size: '500x',
+                    playsinline: block.settings.video_inline,
+                    autoplay: block.settings.video_autoplay,
+                    loop: block.settings.video_loop,
+                    controls: block.settings.video_controls,
+                    muted: block.settings.video_muted
+                }}
+              {% if block.settings.link %}
+                </a>
+              {% endif %}
+            {% endif %}
+
+            {% if block.type == 'image' %}
+              {% if block.settings.link %}
+                <a href="{{ block.settings.link }}">
+              {% endif %}
+                {% if block.settings.image %}
+                  <img src="{{ block.settings.image | image_url: height: image_height }}">
+                {% else %}
+                  <img 
+                    src="data:image/svg+xml,%3C%3Fxml version='1.0' encoding='UTF-8'%3F%3E%3Csvg version='1.1' viewBox='0 0 500 500' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Crect x='2' y='2' width='100%' height='100%' fill='%23C8C8C8' stroke='%23D8D8D8' stroke-width='4'/%3E%3C/g%3E%3C/svg%3E">
+                {% endif %}
+              {% if block.settings.link %}
+                </a>
+              {% endif %}
+            {% endif %}
+          </div>
+        {% endif %}
+      {% endfor %}
+    </div>
+    
+  </div>
+
+  <!-- Results Section -->
+  <div class="results-section">
+    <h2>{{ section.settings.title_text }} <span class="heart-icon">💜</span></h2>
+
+    {% for block in section.blocks %}
+      {% if block.type == 'block' %}
+        <div class="result-item">
+          <div class="progress-circle" style="width: {{ section.settings.desktop_circle_size }}px; height: {{ section.settings.desktop_circle_size }}px;" data-percent="{{ block.settings.percent }}">
+            <svg viewBox="0 0 100 100">
+              <circle class="progress-background" cx="50" cy="50" r="45"></circle>
+              <circle class="progress-bar" cx="50" cy="50" r="45" stroke-dasharray="282.6" stroke-dashoffset="calc(282.6 - (282.6 * {{ block.settings.percent }}) / 100)"></circle>
+            </svg>
+            <span>{{ block.settings.percent }}%</span>
+          </div>
+          <div class="result-text">{{ block.settings.result_text }}</div>
+        </div>
+      {% endif %}
+    {% endfor %}
+
+    <p>{{ section.settings.footer_text }}</p>
+
+    <a href="{{ section.settings.button_link }}" class="claim-button">{{ section.settings.button_text }}</a>
+
+    <div class="rating-section">
+      <span class="stars">★★★★★</span> 
+      {{ section.settings.rating_text }} 
+      <span class="rating-number">{{ section.settings.rating_number }}</span> | {{ section.settings.review_count }} trusted reviews
+    </div>
+  </div>
+</div>
+
+<!-- Pause marquee on hover -->
+<style>
+  #sp-{{ section.id }} .sp-container:hover .sp-grid {
+    animation-play-state: paused;
+  }
+</style>
+
+<script>
+  document.querySelectorAll('.sp-container').forEach(function(container) {
+    container.addEventListener('mouseover', function() {
+      const marqueeGrid = container.querySelector('.sp-grid');
+      marqueeGrid.style.animationPlayState = 'paused';
+    });
+
+    container.addEventListener('mouseout', function() {
+      const marqueeGrid = container.querySelector('.sp-grid');
+      marqueeGrid.style.animationPlayState = 'running';
+    });
+  });
+</script>
+
+
+{% schema %}
+{
+  "name": "result-marquee",
+  "settings": [
+    {
+      "type": "text",
+      "id": "title_text",
+      "label": "Title Text",
+      "default": "The Future Is Hair-Free!"
+    },
+    {
+      "type": "color",
+      "id": "title_color",
+      "label": "Title Color",
+      "default": "#222"
+    },
+    {
+      "type": "color",
+      "id": "icon_color",
+      "label": "Heart Icon Color",
+      "default": "#a259ff"
+    },
+    {
+      "type": "text",
+      "id": "footer_text",
+      "label": "Footer Text",
+      "default": "* Results according to clinical/consumer studies. For more information, refer to each product page."
+    },
+    {
+      "type": "color",
+      "id": "background_color",
+      "label": "Background Color",
+      "default": "#fff"
+    },
+    {
+      "type": "color",
+      "id": "progress_color",
+      "label": "Progress Circle Bar Color",
+      "default": "#5c29ad"
+    },
+    {
+      "type": "color",
+      "id": "progress_text_color",
+      "label": "Progress Circle Text Color",
+      "default": "#5c29ad"
+    },
+    {
+      "type": "range",
+      "id": "desktop_circle_size",
+      "label": "Desktop Circle Size",
+      "default": 120,
+      "min": 50,
+      "max": 200,
+      "step": 2
+    },
+    {
+      "type": "range",
+      "id": "mobile_circle_size",
+      "label": "Mobile Circle Size",
+      "default": 80,
+      "min": 50,
+      "max": 200,
+      "step": 2
+    },
+    {
+      "type": "color",
+      "id": "text_color",
+      "label": "Text Color",
+      "default": "#444"
+    },
+    {
+      "type": "text",
+      "id": "button_text",
+      "label": "Button Text",
+      "default": "CLAIM OFFER"
+    },
+    {
+      "type": "text",
+      "id": "button_link",
+      "label": "Button Link (Product URL)",
+      "default": "/products/sample-product"
+    },
+    {
+      "type": "color",
+      "id": "button_background_color",
+      "label": "Button Background Color",
+      "default": "#5c29ad"
+    },
+    {
+      "type": "text",
+      "id": "rating_text",
+      "label": "Rating Text",
+      "default": "Excellent"
+    },
+    {
+      "type": "text",
+      "id": "rating_number",
+      "label": "Rating Number",
+      "default": "4.8"
+    },
+    {
+      "type": "text",
+      "id": "review_count",
+      "label": "Review Count",
+      "default": "1,319"
+    },
+    {
+      "type": "font_picker",
+      "id": "text_font",
+      "label": "Text Font",
+      "default": "sans-serif"
+    },
+    {
+      "type": "range",
+      "id": "text_size",
+      "label": "Text Size",
+      "min": 10,
+      "max": 50,
+      "default": 15
+    },
+    {
+      "type": "number",
+      "id": "height",
+      "label": "Height of Media",
+      "default": 300
+    },
+    {
+      "type": "range",
+      "id": "media_radius",
+      "min": 0,
+      "max": 50,
+      "default": 5,
+      "label": "Round Borders on Media"
+    },
+    {
+      "type": "checkbox",
+      "id": "media_shadow",
+      "default": true,
+      "label": "Subtle Shadow on Media"
+    },
+    {
+      "type": "select",
+      "id": "media_aspect_ratio",
+      "label": "Media Aspect Ratio",
+      "options": [
+        { "value": "21 / 9", "label": "21:9" },
+        { "value": "16 / 9", "label": "16:9" },
+        { "value": "4 / 3", "label": "4:3" },
+        { "value": "1 / 1", "label": "1:1" },
+        { "value": "auto", "label": "auto" }
+      ],
+      "default": "1 / 1"
+    },
+    {
+      "type": "select",
+      "id": "slideshow_speed",
+      "label": "Slideshow Speed",
+      "options": [
+        { "value": "2s", "label": "Fastest" },
+        { "value": "5s", "label": "Faster" },
+        { "value": "10s", "label": "Fast" },
+        { "value": "15s", "label": "Medium" },
+        { "value": "20s", "label": "Slow" },
+        { "value": "30s", "label": "Slower" },
+        { "value": "50s", "label": "Slowest" },
+        { "value": "250s", "label": "Crawl" }
+      ],
+      "default": "10s"
+    }
+  ],
+  "blocks": [
+    {
+      "type": "block",
+      "name": "Result Item",
+      "settings": [
+        {
+          "type": "range",
+          "id": "percent",
+          "label": "Percentage",
+          "default": 95,
+          "min": 0,
+          "max": 100,
+          "step": 1
+        },
+        {
+          "type": "text",
+          "id": "result_text",
+          "label": "Result Text",
+          "default": "Said the appearance of their strawberry legs improved"
+        }
+      ]
+    },
+    {
+      "type": "image",
+      "name": "Marquee Image",
+      "settings": [
+        {
+          "type": "image_picker",
+          "id": "image",
+          "label": "Image"
+        },
+        {
+          "type": "url",
+          "id": "link",
+          "label": "Optional Link"
+        }
+      ]
+    },
+    {
+      "type": "video",
+      "name": "Marquee Video",
+      "settings": [
+        {
+          "type": "video",
+          "id": "video",
+          "label": "Video"
+        },
+        {
+          "type": "url",
+          "id": "link",
+          "label": "Optional Link"
+        },
+        {
+          "type": "checkbox",
+          "id": "video_inline",
+          "label": "Play Inline",
+          "default": true
+        },
+        {
+          "type": "checkbox",
+          "id": "video_autoplay",
+          "label": "Autoplay",
+          "default": true
+        },
+        {
+          "type": "checkbox",
+          "id": "video_loop",
+          "label": "Loop Video",
+          "default": true
+        },
+        {
+          "type": "checkbox",
+          "id": "video_controls",
+          "label": "Show Video Controls",
+          "default": false
+        },
+        {
+          "type": "checkbox",
+          "id": "video_muted",
+          "label": "Mute Video",
+          "default": true
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Combined Marquee and Results",
+      "category": "Custom"
+    }
+  ]
+}
+{% endschema %}

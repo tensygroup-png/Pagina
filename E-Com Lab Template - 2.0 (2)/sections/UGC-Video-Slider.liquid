@@ -1,0 +1,580 @@
+{%- style -%}
+  #shopify-section-{{ section.id }} {
+    --section-padding-top: {{ section.settings.padding_top }}px;
+    --section-padding-bottom: {{ section.settings.padding_bottom }}px;
+  }
+
+  .video-slider {
+    display: flex;
+    gap: 20px;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    padding: 10px 0;
+    scroll-behavior: smooth;
+    cursor: grab; /* Cursor style for dragging */
+  }
+
+  .video-slider.grabbing {
+    cursor: grabbing; /* Cursor style while dragging */
+  }
+
+  .video-slider::-webkit-scrollbar {
+    display: none; /* Hide scrollbar */
+  }
+
+  .video-slider .testimonial__item {
+    position: relative; /* Ensure icons are positioned correctly */
+    flex: 0 0 calc(100% / {{ section.settings.videos_per_row }} - 20px); /* Control videos per row on desktop */
+    scroll-snap-align: center;
+    border-radius: {{ section.settings.video_border_radius }}px; /* Custom border radius */
+    overflow: hidden;
+    height: calc(100vw / {{ section.settings.videos_per_row }} * {{ section.settings.video_aspect_ratio }}); /* Adjust height based on aspect ratio */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+
+  .video-slider video {
+    width: 100%;
+    height: 100%;
+    object-fit: fill; /* Ensure video completely fills the container */
+  }
+
+  .mute-icon, .play-icon {
+    position: absolute;
+    width: 35px;
+    height: 35px;
+    background-color: rgba(0, 0, 0, 0.5);
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 10;
+    cursor: pointer;
+  }
+
+  .mute-icon {
+    bottom: 10px;
+    right: 10px;
+  }
+
+  .play-icon {
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+  }
+
+  .mute-icon svg, .play-icon svg {
+    fill: {{ section.settings.play_button_color }};
+    width: 20px;
+    height: 20px;
+  }
+
+  .mute-icon.muted svg {
+    fill: white; /* Muted icon remains white */
+  }
+
+  @media only screen and (max-width: 1024px) {
+    .video-slider .testimonial__item {
+      flex: 0 0 calc(100% / {{ section.settings.videos_per_row_mobile }} - 20px); /* Control videos per row on mobile */
+      height: calc(100vw / {{ section.settings.videos_per_row_mobile }} * {{ section.settings.video_aspect_ratio }}); /* Adjust height for mobile */
+    }
+    .mute-icon, .play-icon {
+      width: 30px;
+      height: 30px;
+    }
+    .mute-icon svg, .play-icon svg {
+      width: 16px;
+      height: 16px;
+    }
+  }
+
+  @media only screen and (max-width: 600px) {
+    .mute-icon, .play-icon {
+      width: 30px;
+      height: 30px;
+    }
+    .mute-icon svg, .play-icon svg {
+      width: 14px;
+      height: 14px;
+    }
+  }
+{%- endstyle -%}
+
+{{ 'section-testimonials.css' | asset_url | stylesheet_tag }}
+{{ 'component-rating.css' | asset_url | stylesheet_tag }}
+
+<div class="video-slider section--padding{% if section.settings.show_divider %} section--divider{% endif %}">
+  <div class="testimonials page-width">
+    <div class="title-wrapper{{ section.settings.heading_alignment }}">
+      <{{ section.settings.heading_tag }} class="title {{ section.settings.heading_size }}">{{ section.settings.heading | escape }}</{{ section.settings.heading_tag }}>
+    </div>
+
+    {%- assign block_count = section.blocks.size -%}
+    {%- if block_count > 0 -%}
+      <testimonials-component data-slider="{% if block_count > 1 %}true{% else %}false{% endif %}" data-autorotate="{{ section.settings.autorotate }}" data-autorotate-speed="{{ section.settings.autorotate_speed | times: 1000 }}">
+        <div class="testimonial__list-wrapper">
+          <div class="video-slider" id="Testimonials-{{ section.id }}">
+            {%- for block in section.blocks -%}
+              <div class="testimonial__item" {{ block.shopify_attributes }}>
+                <div class="testimonial__image media-wrapper media-wrapper--small">
+                  {%- if block.settings.video != blank -%}
+                    {{ block.settings.video | video_tag:
+                          image_size: "3840px",
+                          autoplay: true,
+                          loop: true,
+                          controls: false,
+                          muted: true,
+                          playsinline: true
+                        }}
+                    <div class="mute-icon muted" data-video-id="{{ forloop.index }}">
+                      <!-- Mute/unmute SVG icon -->
+                      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                        <path d="M12 3.5l-6 6H3.5v5h2.5l6 6V3.5zM14 4v16l4-4h3V8h-3l-4-4z"/>
+                      </svg>
+                    </div>
+                    <div class="play-icon" data-video-id="{{ forloop.index }}">
+                      <!-- Play button SVG icon -->
+                      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" class="bi bi-play-circle">
+                        <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14m0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16"/>
+                        <path d="M6.271 5.055a.5.5 0 0 1 .52.038l3.5 2.5a.5.5 0 0 1 0 .814l-3.5 2.5A.5.5 0 0 1 6 10.5v-5a.5.5 0 0 1 .271-.445"/>
+                      </svg>
+                    </div>
+                  {%- else -%}
+                    <div class="media media--square">
+                      {{ 'image' | placeholder_svg_tag: 'placeholder' }}
+                    </div>
+                  {%- endif -%}
+                </div>
+              </div>
+            {%- endfor -%}
+          </div>
+        </div>
+      </testimonials-component>
+    {%- endif -%}
+  </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const videoSlider = document.querySelector('#Testimonials-{{ section.id }}');
+    const muteIcons = document.querySelectorAll('.mute-icon');
+    const playIcons = document.querySelectorAll('.play-icon');
+    
+    const items = videoSlider.querySelectorAll('.testimonial__item');
+    let isDragging = false;
+    let startPos = 0;
+    let currentTranslate = 0;
+    let prevTranslate = 0;
+    let animationID;
+    let currentIndex = 0; // Index of currently visible video
+
+    // Desktop dragging implementation
+    videoSlider.addEventListener('mousedown', startDrag);
+    videoSlider.addEventListener('mousemove', drag);
+    videoSlider.addEventListener('mouseup', endDrag);
+    videoSlider.addEventListener('mouseleave', endDrag);
+
+    // Prevent text selection while dragging
+    videoSlider.addEventListener('dragstart', (e) => e.preventDefault());
+
+    // Start dragging
+    function startDrag(e) {
+        isDragging = true;
+        startPos = e.pageX;
+        animationID = requestAnimationFrame(animation);
+        videoSlider.classList.add('grabbing');
+    }
+
+    // Handle dragging motion
+    function drag(e) {
+        if (!isDragging) return;
+        const currentPosition = e.pageX;
+        currentTranslate = prevTranslate + (currentPosition - startPos);
+        e.preventDefault(); // Prevent default drag behavior
+    }
+
+    // End dragging
+    function endDrag() {
+        isDragging = false;
+        cancelAnimationFrame(animationID);
+        videoSlider.classList.remove('grabbing');
+
+        const movedBy = currentTranslate - prevTranslate;
+
+        // Threshold for snapping to next/previous video
+        if (movedBy < -100 && currentIndex < items.length - 1) {
+            currentIndex += 1; // Move to next video
+        }
+        if (movedBy > 100 && currentIndex > 0) {
+            currentIndex -= 1; // Move to previous video
+        }
+
+        snapToItem();
+    }
+
+    // Animate slider movement
+    function animation() {
+        videoSlider.style.transform = `translateX(${currentTranslate}px)`;
+        if (isDragging) requestAnimationFrame(animation);
+    }
+
+    // Snap to the nearest video item
+    function snapToItem() {
+        const itemWidth = items[0].clientWidth + 20; // Add gap of 20px between items
+        currentTranslate = -currentIndex * itemWidth;
+        prevTranslate = currentTranslate;
+        videoSlider.style.transform = `translateX(${currentTranslate}px)`;
+    }
+
+    // Mute and Play functionality
+    muteIcons.forEach((icon, index) => {
+        const video = videoSlider.querySelectorAll('video')[index];
+
+        // Initialize the mute icon based on the video's muted state at the start
+        if (video.muted) {
+            icon.classList.add('muted');
+            icon.innerHTML = `
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" class="bi bi-volume-mute">
+                <path d="M6.717 3.55A.5.5 0 0 1 7 4v8a.5.5 0 0 1-.812.39L3.825 10.5H1.5A.5.5 0 0 1 1 10V6a.5.5 0 0 1 .5-.5h2.325l2.363-1.89a.5.5 0 0 1 .529-.06M6 5.04 4.312 6.39A.5.5 0 0 1 4 6.5H2v3h2a.5.5 0 0 1 .312.11L6 10.96zm7.854.606a.5.5 0 0 1 0 .708L12.207 8l1.647 1.646a.5.5 0 0 1-.708.708L11.5 8.707l-1.646 1.647a.5.5 0 0 1-.708-.708L10.793 8 9.146 6.354a.5.5 0 1 1 .708-.708L11.5 7.293l1.646-1.647a.5.5 0 0 1 .708 0"/>
+              </svg>
+            `;
+        } else {
+            icon.classList.remove('muted');
+            icon.innerHTML = `
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" class="bi bi-volume-up">
+                <path d="M11.536 14.01A8.47 8.47 0 0 0 14.026 8a8.47 8.47 0 0 0-2.49-6.01l-.708.707A7.48 7.48 0 0 1 13.025 8c0 2.071-.84 3.946-2.197 5.303z"/>
+                <path d="M10.121 12.596A6.48 6.48 0 0 0 12.025 8a6.48 6.48 0 0 0-1.904-4.596l-.707.707A5.48 5.48 0 0 1 11.025 8a5.48 5.48 0 0 1-1.61 3.89z"/>
+                <path d="M10.025 8a4.5 4.5 0 0 1-1.318 3.182L8 10.475A3.5 3.5 0 0 0 9.025 8c0-.966-.392-1.841-1.025-2.475l.707-.707A4.5 4.5 0 0 1 10.025 8M7 4a.5.5 0 0 0-.812-.39L3.825 5.5H1.5A.5.5 0 0 0 1 6v4a.5.5 0 0 0 .5.5h2.325l2.363 1.89A.5.5 0 0 0 7 12z"/>
+              </svg>
+            `;
+        }
+
+        // Toggle mute/unmute on icon click
+        icon.addEventListener('click', function() {
+            if (video.muted) {
+                video.muted = false;
+                icon.classList.remove('muted');
+                icon.innerHTML = `
+                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" class="bi bi-volume-up">
+                    <path d="M11.536 14.01A8.47 8.47 0 0 0 14.026 8a8.47 8.47 0 0 0-2.49-6.01l-.708.707A7.48 7.48 0 0 1 13.025 8c0 2.071-.84 3.946-2.197 5.303z"/>
+                    <path d="M10.121 12.596A6.48 6.48 0 0 0 12.025 8a6.48 6.48 0 0 0-1.904-4.596l-.707.707A5.48 5.48 0 0 1 11.025 8a5.48 5.48 0 0 1-1.61 3.89z"/>
+                    <path d="M10.025 8a4.5 4.5 0 0 1-1.318 3.182L8 10.475A3.5 3.5 0 0 0 9.025 8c0-.966-.392-1.841-1.025-2.475l.707-.707A4.5 4.5 0 0 1 10.025 8M7 4a.5.5 0 0 0-.812-.39L3.825 5.5H1.5A.5.5 0 0 0 1 6v4a.5.5 0 0 0 .5.5h2.325l2.363 1.89A.5.5 0 0 0 7 12z"/>
+                  </svg>
+                `;
+            } else {
+                video.muted = true;
+                icon.classList.add('muted');
+                icon.innerHTML = `
+                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" class="bi bi-volume-mute">
+                    <path d="M6.717 3.55A.5.5 0 0 1 7 4v8a.5.5 0 0 1-.812.39L3.825 10.5H1.5A.5.5 0 0 1 1 10V6a.5.5 0 0 1 .5-.5h2.325l2.363-1.89a.5.5 0 0 1 .529-.06M6 5.04 4.312 6.39A.5.5 0 0 1 4 6.5H2v3h2a.5.5 0 0 1 .312.11L6 10.96zm7.854.606a.5.5 0 0 1 0 .708L12.207 8l1.647 1.646a.5.5 0 0 1-.708.708L11.5 8.707l-1.646 1.647a.5.5 0 0 1-.708-.708L10.793 8 9.146 6.354a.5.5 0 1 1 .708-.708L11.5 7.293l1.646-1.647a.5.5 0 0 1 .708 0"/>
+                  </svg>
+                `;
+            }
+        });
+    });
+
+    playIcons.forEach((icon, index) => {
+        const video = videoSlider.querySelectorAll('video')[index];
+
+        // Play the video and hide the play icon when the play button is clicked
+        icon.addEventListener('click', function() {
+            video.play();
+            icon.style.display = 'none'; // Hide the play icon when the video starts playing
+        });
+
+        // Add click event to the video to pause and show the play icon
+        video.addEventListener('click', function() {
+            if (!video.paused) {
+                video.pause();
+                playIcons[index].style.display = 'flex'; // Show the play icon when the video pauses
+            }
+        });
+
+        // Hide play icon when the video starts playing
+        video.addEventListener('play', function() {
+            playIcons[index].style.display = 'none';
+        });
+
+        // Show play icon when the video pauses
+        video.addEventListener('pause', function() {
+            playIcons[index].style.display = 'flex';
+        });
+    });
+});
+</script>
+
+
+{% schema %}
+{
+  "name": "Videos slider",
+  "tag": "section",
+  "class": "section",
+  "settings": [
+    {
+      "type": "checkbox",
+      "id": "autorotate",
+      "default": false,
+      "label": "Enable auto-rotate"
+    },
+    {
+      "type": "range",
+      "id": "autorotate_speed",
+      "label": "Auto-rotate speed",
+      "max": 9,
+      "min": 3,
+      "step": 2,
+      "unit": "sec",  
+      "default": 5
+    },
+    {
+      "type": "range",
+      "id": "videos_per_row",
+      "label": "Videos per row (desktop)",
+      "min": 1,
+      "max": 4,
+      "step": 1,
+      "default": 3
+    },
+    {
+      "type": "range",
+      "id": "videos_per_row_mobile",
+      "label": "Videos per row (mobile)",
+      "min": 1,
+      "max": 3,
+      "step": 1,
+      "default": 2
+    },
+    {
+      "type": "select",
+      "id": "video_aspect_ratio",
+      "label": "Video Aspect Ratio",
+      "options": [
+        {
+          "value": "1.78",
+          "label": "16:9"
+        },
+        {
+          "value": "1",
+          "label": "1:1"
+        },
+        {
+          "value": "0.5625",
+          "label": "9:16"
+        },
+        {
+          "value": "custom",
+          "label": "Custom"
+        }
+      ],
+      "default": "0.5625"
+    },
+    {
+      "type": "range",
+      "id": "video_border_radius",
+      "label": "Video Border Radius",
+      "min": 0,
+      "max": 30,
+      "step": 1,
+      "default": 15,
+      "unit": "px"
+    },
+    {
+      "type": "color",
+      "id": "play_button_color",
+      "label": "Play Button Color",
+      "default": "#ffffff"
+    },
+    {
+      "type": "range",
+      "id": "custom_video_width_desktop",
+      "label": "Custom Width for Desktop",
+      "default": 400,
+      "min": 200,
+      "max": 1200,
+      "step": 10,
+      "unit": "px"
+    },
+    {
+      "type": "range",
+      "id": "custom_video_height_desktop",
+      "label": "Custom Height for Desktop",
+      "default": 700,
+      "min": 400,
+      "max": 1200,
+      "step": 10,
+      "unit": "px"
+    },
+    {
+      "type": "range",
+      "id": "custom_video_width_mobile",
+      "label": "Custom Width for Mobile",
+      "default": 300,
+      "min": 100,
+      "max": 500,
+      "step": 10,
+      "unit": "px"
+    },
+    {
+      "type": "range",
+      "id": "custom_video_height_mobile",
+      "label": "Custom Height for Mobile",
+      "default": 500,
+      "min": 100,
+      "max": 600,
+      "step": 10,
+      "unit": "px"
+    },
+    {
+      "type": "header",
+      "content": "Heading"
+    },
+    {
+      "type": "text",
+      "id": "heading",
+      "default": "Videos",
+      "label": "Heading"
+    },
+    {
+      "type": "select",
+      "id": "heading_size",
+      "options": [
+        {
+          "value": "h2",
+          "label": "Small"
+        },
+        {
+          "value": "h1",
+          "label": "Medium"
+        },
+        {
+          "value": "h0",
+          "label": "Large"
+        }
+      ],
+      "default": "h1",
+      "label": "Heading size"
+    },
+    {
+      "type": "select",
+      "id": "heading_alignment",
+      "label": "Heading alignment",
+      "options": [
+        {
+          "value": "left",
+          "label": "Left"
+        },
+        {
+          "value": "center",
+          "label": "Center"
+        },
+        {
+          "value": "right",
+          "label": "Right"
+        }
+      ],
+      "default": "center"
+    },
+    {
+      "type": "select",
+      "id": "heading_tag",
+      "options": [
+        {
+          "value": "h1",
+          "label": "H1"
+        },
+        {
+          "value": "h2",
+          "label": "H2"
+        },
+        {
+          "value": "h3",
+          "label": "H3"
+        },
+        {
+          "value": "h4",
+          "label": "H4"
+        },
+        {
+          "value": "h5",
+          "label": "H5"
+        },
+        {
+          "value": "h6",
+          "label": "H6"
+        },
+        {
+          "value": "div",
+          "label": "DIV"
+        },
+        {
+          "value": "span",
+          "label": "SPAN"
+        },
+        {
+          "value": "p",
+          "label": "P"
+        }
+      ],
+      "default": "h2",
+      "label": "Heading Tag"
+    },
+    {
+      "type": "header",
+      "content": "Padding"
+    },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "min": 0,
+      "max": 100,
+      "step": 4,
+      "unit": "px",
+      "label": "Top Padding",
+      "default": 36
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "min": 0,
+      "max": 100,
+      "step": 4,
+      "unit": "px",
+      "label": "Bottom Padding",
+      "default": 36
+    }
+  ],
+  "blocks": [
+    {
+      "type": "testimonial",
+      "name": "video",
+      "settings": [
+        {
+          "type": "video",
+          "id": "video",
+          "label": "Video link"
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Videos slider",
+      "blocks": [
+        {
+          "type": "testimonial"
+        },
+        {
+          "type": "testimonial"
+        },
+        {
+          "type": "testimonial"
+        }
+      ]
+    }
+  ],
+  "disabled_on": {
+    "groups": ["header", "footer", "custom.overlay"]
+  }
+}
+{% endschema %}

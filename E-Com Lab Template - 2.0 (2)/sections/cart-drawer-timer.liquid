@@ -1,0 +1,65 @@
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    var cartDrawer = document.getElementById('cart-drawer');
+    var timerDisplay = document.getElementById('cart-timer');
+    
+    // Function to initialize the cart timer
+    function initializeCartTimer() {
+      var duration = {{ section.settings.cart_timer_duration | default: 300 }}; // Default to 5 minutes (300 seconds)
+      var storedTime = localStorage.getItem('cartTimer');
+      
+      if (storedTime && storedTime > 0) {
+        duration = storedTime;
+      }
+
+      // Timer update loop
+      var interval = setInterval(function() {
+        var minutes = Math.floor(duration / 60);
+        var seconds = duration % 60;
+        seconds = seconds < 10 ? '0' + seconds : seconds;
+        timerDisplay.textContent = minutes + ':' + seconds;
+
+        // Save the remaining time to localStorage
+        localStorage.setItem('cartTimer', duration);
+
+        if (duration <= 0) {
+          clearInterval(interval);
+          document.getElementById('cart-timer-wrapper').innerHTML = "{{ section.settings.cart_timer_expired_text }}";
+          localStorage.removeItem('cartTimer'); // Clear storage when timer ends
+        }
+        duration--;
+      }, 1000);
+    }
+
+    // Keep the timer running even if the cart drawer is closed
+    if (!localStorage.getItem('cartTimer')) {
+      initializeCartTimer(); // Start the timer if not yet initialized
+    } else {
+      initializeCartTimer(); // If timer exists, continue the countdown
+    }
+
+    // Listen for when the cart drawer opens
+    document.querySelector('.cart-drawer-open-button').addEventListener('click', function() {
+      cartDrawer.classList.add('open');
+    });
+
+    // Close drawer but don't clear timer
+    document.querySelector('.cart-drawer-close').addEventListener('click', function() {
+      cartDrawer.classList.remove('open');
+    });
+
+    // Listen for adding products to the cart (this event might vary depending on your theme or AJAX implementation)
+    document.addEventListener('cart:updated', function() {
+      // Ensure the timer is still running without interruption
+      if (!localStorage.getItem('cartTimer')) {
+        initializeCartTimer(); // Restart the timer if it was cleared
+      }
+      // Ensure the timer remains visible even after cart is updated
+      setTimeout(function() {
+        // Check if the timer element still exists and is visible
+        if (!timerDisplay) return;
+        timerDisplay.style.display = 'block'; // Force display if hidden during cart update
+      }, 100); // Delay to ensure any cart updates finish before showing the timer
+    });
+  });
+</script>

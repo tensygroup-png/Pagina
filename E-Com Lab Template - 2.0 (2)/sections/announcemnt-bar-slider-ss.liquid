@@ -1,0 +1,451 @@
+<style>
+/* Hauptcontainer */
+#sp-{{ section.id }} {
+  background-color: {{ section.settings.bg_color_text }};
+  color: {{ section.settings.color_text }};
+  height: {{ section.settings.bar_height }}px;
+  overflow: hidden;
+  position: relative;
+  display: flex;
+  align-items: center; /* Zentriert vertikal */
+  justify-content: center; /* Zentriert horizontal */
+  padding: {{ section.settings.padding_top }}px {{ section.settings.padding_bottom }}px;
+  box-sizing: border-box;
+}
+
+.announcement-bar-content {
+  display: flex;
+  transition: transform 0.5s ease-in-out;
+}
+
+.slide {
+  flex: 0 0 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  height: 100%;
+  padding: 0 10px;
+  box-sizing: border-box;
+}
+
+/* Flexbox für Label und Countdown */
+.slide-content {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: {{ section.settings.text_spacing }}px;
+  flex-wrap: nowrap;
+}
+
+.text {
+  font-size: {{ block.settings.text_size | default: section.settings.text_size }}px;
+  font-style: {{ block.settings.font_style | default: section.settings.font_style }};
+  font-weight: {{ block.settings.font_weight | default: section.settings.font_weight }};
+  color: {{ block.settings.text_color | default: section.settings.text_color }};
+  padding: 0;
+  text-align: center;
+  white-space: nowrap;
+  word-wrap: normal;
+}
+
+/* Countdown-Stil */
+.countdown-container {
+  display: flex;
+  gap: {{ section.settings.countdown_spacing }}px; /* Anpassbarer Abstand zwischen Countdown-Boxen */
+  align-items: center;
+  justify-content: center;
+}
+
+.countdown-container .time-box {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: {{ section.settings.bg_color_time_box }};
+  color: {{ section.settings.color_text }};
+  padding: {{ section.settings.padding }};
+  border-radius: 5px;
+  font-weight: {{ section.settings.font_weight }};
+  font-size: {{ section.settings.text_size }}px;
+  min-width: 40px;
+}
+
+.countdown-container .time-box .value {
+  font-size: {{ section.settings.countdown_value_size }}px;
+}
+
+.countdown-container .time-box .label {
+  font-size: {{ section.settings.countdown_label_size }}px;
+  margin-left: 4px;
+}
+
+/* Navigation Arrow Styling */
+.arrow {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  background-color: transparent; /* Make background invisible */
+  color: {{ section.settings.arrow_icon_color }};
+  width: 40px;
+  height: 40px;
+  border: none;
+  border-radius: 50%; /* Circle removed for seamless styling */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  z-index: 10;
+}
+
+.arrow.left {
+  left: 5px;
+}
+
+.arrow.right {
+  right: 5px;
+}
+
+.arrow:hover {
+  background-color: transparent; /* Ensure no hover effect cuts text */
+}
+
+.arrow:focus {
+  outline: none;
+}
+
+/* Responsive Anpassungen für Mobile */
+@media (max-width: 768px) {
+  #sp-{{ section.id }} {
+    height: {{ section.settings.bar_height_mobile }}px;
+    padding-top: {{ section.settings.padding_top_mobile }}px;
+    padding-bottom: {{ section.settings.padding_bottom_mobile }}px;
+  }
+
+  .slide-content {
+    flex-direction: row;
+    gap: {{ section.settings.text_spacing_mobile }}px;
+    justify-content: space-between;
+    flex-wrap: nowrap;
+  }
+
+  .countdown-container {
+    gap: {{ section.settings.countdown_spacing_mobile }}px; /* Adjust spacing for mobile */
+  }
+
+  .countdown-container .time-box {
+    padding: 2px 6px;
+    min-width: 30px;
+  }
+
+  .countdown-container .time-box .value {
+    font-size: {{ section.settings.countdown_value_size_mobile }}px;
+  }
+
+  .countdown-container .time-box .label {
+    font-size: {{ section.settings.countdown_label_size_mobile }}px;
+  }
+
+  .text {
+    font-size: {{ block.settings.text_size_mobile | default: section.settings.text_size_mobile }}px;
+    white-space: nowrap;
+  }
+}
+</style>
+
+<div id="sp-{{ section.id }}" class="announcement-bar">
+  {% if section.settings.show_arrows %}
+    <button class="arrow left">&#9664;</button>
+  {% endif %}
+  
+  <div class="announcement-bar-content">
+    {% for block in section.blocks %}
+      <div class="slide">
+        <div class="slide-content">
+          {% if block.type == 'countdown' %}
+            {% if block.settings.countdown_label != blank %}
+              <span class="text">{{ block.settings.countdown_label }}</span>
+            {% endif %}
+            <div class="countdown-container">
+              <div class="time-box">
+                <span class="value" id="days-{{ block.id }}">00</span>
+                <span class="label">d</span>
+              </div>
+              <div class="time-box">
+                <span class="value" id="hours-{{ block.id }}">00</span>
+                <span class="label">h</span>
+              </div>
+              <div class="time-box">
+                <span class="value" id="minutes-{{ block.id }}">00</span>
+                <span class="label">m</span>
+              </div>
+              <div class="time-box">
+                <span class="value" id="seconds-{{ block.id }}">00</span>
+                <span class="label">s</span>
+              </div>
+            </div>
+          {% elsif block.type == 'text' %}
+            <span class="text">{{ block.settings.text_content }}</span>
+          {% endif %}
+        </div>
+      </div>
+    {% endfor %}
+  </div>
+  
+  {% if section.settings.show_arrows %}
+    <button class="arrow right">&#9654;</button>
+  {% endif %}
+</div>
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+  const sliderContent = document.querySelector("#sp-{{ section.id }} .announcement-bar-content");
+  const slides = Array.from(sliderContent.children);
+  const slideCount = slides.length;
+
+  let currentIndex = 0;
+
+  // Set dynamic width for slider and slides
+  sliderContent.style.width = `${100 * slideCount}%`;
+  slides.forEach(slide => {
+    slide.style.width = `${100 / slideCount}%`;
+  });
+
+  // Slide navigation
+  const moveSlide = (direction) => {
+    if (slideCount > 1) {
+      currentIndex = (currentIndex + direction + slideCount) % slideCount;
+      sliderContent.style.transform = `translateX(-${currentIndex * 100}%)`;
+    }
+  };
+
+  {% if section.settings.show_arrows %}
+    // Arrow button functionality
+    document.querySelector(".arrow.left").addEventListener("click", () => moveSlide(-1));
+    document.querySelector(".arrow.right").addEventListener("click", () => moveSlide(1));
+  {% endif %}
+
+  // Countdown functionality
+  {% for block in section.blocks %}
+    {% if block.type == 'countdown' %}
+      const endDate{{ block.id }} = new Date("{{ block.settings.end_date }}").getTime();
+
+      function updateCountdown{{ block.id }}() {
+        const now = new Date().getTime();
+        const distance = endDate{{ block.id }} - now;
+
+        if (distance <= 0) {
+          document.getElementById("days-{{ block.id }}").textContent = "00";
+          document.getElementById("hours-{{ block.id }}").textContent = "00";
+          document.getElementById("minutes-{{ block.id }}").textContent = "00";
+          document.getElementById("seconds-{{ block.id }}").textContent = "00";
+          clearInterval(interval{{ block.id }}); // Stop interval when countdown ends
+          return;
+        }
+
+        const days = Math.floor(distance / (1000 * 60 * 60 * 24));
+        const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+        const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+        const seconds = Math.floor((distance % (1000 * 60)) / 1000);
+
+        document.getElementById("days-{{ block.id }}").textContent = String(days).padStart(2, '0');
+        document.getElementById("hours-{{ block.id }}").textContent = String(hours).padStart(2, '0');
+        document.getElementById("minutes-{{ block.id }}").textContent = String(minutes).padStart(2, '0');
+        document.getElementById("seconds-{{ block.id }}").textContent = String(seconds).padStart(2, '0');
+      }
+
+      const interval{{ block.id }} = setInterval(updateCountdown{{ block.id }}, 1000);
+      updateCountdown{{ block.id }}(); // Initial call
+    {% endif %}
+  {% endfor %}
+});
+</script>
+
+
+
+
+
+
+
+
+{% schema %}
+{
+  "name": "Announcement Bar",
+  "settings": [
+    {
+      "type": "range",
+      "id": "bar_height",
+      "label": "Bar Height (Desktop)",
+      "min": 30,
+      "max": 100,
+      "step": 1,
+      "default": 30
+    },
+    {
+      "type": "range",
+      "id": "bar_height_mobile",
+      "label": "Bar Height (Mobile)",
+      "min": 20,
+      "max": 80,
+      "step": 1,
+      "default": 20
+    },
+    {
+  "type": "checkbox",
+  "id": "show_arrows",
+  "label": "Show Arrows",
+  "default": true
+},
+
+    {
+      "type": "range",
+      "id": "slider_interval",
+      "label": "Slider Interval (seconds)",
+      "min": 2,
+      "max": 20,
+      "step": 1,
+      "default": 5
+    },
+    {
+      "type": "color",
+      "id": "bg_color_text",
+      "label": "Background Color",
+      "default": "#FF5C5C"
+    },
+    {
+      "type": "color",
+      "id": "color_text",
+      "label": "Text Color",
+      "default": "#FFFFFF"
+    },
+    
+    {
+      "type": "color",
+      "id": "arrow_icon_color",
+      "label": "Arrow Icon Color",
+      "default": "#FFFFFF"
+    },
+   
+    {
+      "type": "range",
+      "id": "text_size",
+      "label": "Text Size",
+      "min": 10,
+      "max": 50,
+      "step": 1,
+      "default": 16
+    },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "label": "Padding Top (Desktop)",
+      "min": 0,
+      "max": 50,
+      "step": 1,
+      "default": 10
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "label": "Padding Bottom (Desktop)",
+      "min": 0,
+      "max": 50,
+      "step": 1,
+      "default": 10
+    },
+    {
+      "type": "range",
+      "id": "padding_top_mobile",
+      "label": "Padding Top (Mobile)",
+      "min": 0,
+      "max": 50,
+      "step": 1,
+      "default": 5
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom_mobile",
+      "label": "Padding Bottom (Mobile)",
+      "min": 0,
+      "max": 50,
+      "step": 1,
+      "default": 5
+    },
+    {
+      "type": "select",
+      "id": "font_style",
+      "label": "Font Style",
+      "options": [
+        {
+          "value": "normal",
+          "label": "Normal"
+        },
+        {
+          "value": "italic",
+          "label": "Italic"
+        },
+        {
+          "value": "oblique",
+          "label": "Oblique"
+        }
+      ],
+      "default": "normal"
+    },
+    {
+      "type": "range",
+      "id": "font_weight",
+      "label": "Font Weight",
+      "min": 100,
+      "max": 900,
+      "step": 100,
+      "default": 400
+    }
+  ],
+  "blocks": [
+    {
+      "type": "countdown",
+      "name": "Countdown Timer",
+      "settings": [
+        {
+          "type": "text",
+          "id": "end_date",
+          "label": "End Date (YYYY-MM-DD HH:MM:SS)",
+          "default": "2024-12-31 23:59:59"
+        },
+        {
+          "type": "text",
+          "id": "countdown_label",
+          "label": "Countdown Label Text",
+          "default": "OFFER ENDS IN:"
+        }
+      ]
+    },
+    {
+      "type": "text",
+      "name": "Text Block",
+      "settings": [
+        {
+          "type": "text",
+          "id": "text_content",
+          "label": "Text Content",
+          "default": "Welcome to our store!"
+        },
+        {
+          "type": "color",
+          "id": "text_color",
+          "label": "Text Color",
+          "default": "#FFFFFF"
+        },
+        {
+          "type": "range",
+          "id": "text_size",
+          "label": "Text Size",
+          "min": 10,
+          "max": 50,
+          "step": 1,
+          "default": 16
+        }
+      ]
+    }
+  ]
+}
+{% endschema %}

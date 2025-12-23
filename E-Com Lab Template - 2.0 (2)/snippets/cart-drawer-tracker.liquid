@@ -1,0 +1,130 @@
+{% assign progress_bar_color = settings.progress_bar_color | default: '#8A4FFF' %}
+{% assign icon_color = settings.icon_border_color | default: '#8A4FFF' %}
+{% assign bar_height = settings.progress_bar_height | default: '24px' %}
+{% assign font_size = settings.font_size | default: '16px' %}
+{% assign icon_size = settings.icon_size | default: '32px' %}
+{% assign custom_text_with_amount = settings.amount_text | default: "You're [amount] away from FREE shipping!" %}
+{% assign success_message = settings.success_message | default: "Congrats! You get FREE shipping!" %}
+{% assign free_shipping_prefix_text = settings.free_shipping_prefix_text | default: "You're" %}
+{% assign free_shipping_suffix_text = settings.free_shipping_suffix_text | default: "away from FREE shipping!" %}
+
+<!-- Shipping calculations -->
+{% assign shipping_value = settings.minimum_free_shipping | times: 100 %}
+{% assign cart_total = cart.total_price %}
+{% assign shipping_value_left = shipping_value | minus: cart_total %}
+
+{% if shipping_value_left < 0 %}
+  {% assign shipping_value_left = 0 %}
+{% endif %}
+
+{% assign shipping_percentage_fraction = cart_total | times: 100 | divided_by: shipping_value %}
+{% if shipping_percentage_fraction > 100 %}
+  {% assign shipping_percentage_fraction = 100 %}
+{% endif %}
+
+<div class="shrine-upsell-container">
+  <!-- Shipping message -->
+  <p class="shrine-shipping-message">
+    {% if shipping_value_left > 0 %}
+      {{ free_shipping_prefix_text }} {{ shipping_value_left | money }} {{ free_shipping_suffix_text }}
+    {% else %}
+      {{ success_message }}
+    {% endif %}
+  </p>
+  
+  <!-- Progress bar -->
+  <div class="shrine-progress-bar-container">
+    <div class="shrine-progress-bar" style="height: {{ bar_height }};">
+      <div class="shrine-progress-bar-done" style="width: {{ shipping_percentage_fraction }}%; background-color: {{ progress_bar_color }};">
+        <div class="zebra-animation"></div>
+      </div>
+      <span class="shrine-progress-icon" style="left: calc(min({{ shipping_percentage_fraction }}%, 100%) - {{ icon_size | divided_by: 2 }}px);">
+        <img src="{{ settings.custom_icon | default: 'local_shipping.svg' | asset_url }}" alt="Shipping icon" style="width: {{ icon_size }}; height: {{ icon_size }}; border-color: {{ icon_color }};">
+      </span>
+    </div>
+  </div>
+</div>
+
+<style>
+/* Container styling */
+.shrine-upsell-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  font-size: {{ font_size }};
+  text-align: center;
+  width: 100%;
+  max-width: 400px;
+  margin: 1rem auto;
+}
+
+/* Shipping message styling */
+.shrine-shipping-message {
+  font-size: {{ font_size }};
+  font-weight: bold;
+  color: #333;
+  margin-bottom: 1rem; /* Ensure space between text and progress bar */
+  display: block; /* Ensure it is visible */
+  text-align: center;
+}
+
+/* Progress bar container */
+.shrine-progress-bar-container {
+  width: 100%;
+  position: relative;
+}
+
+/* Base progress bar styling */
+.shrine-progress-bar {
+  background-color: #E2E4E3;
+  width: 100%;
+  border-radius: 1.5em;
+  position: relative;
+  overflow: hidden;
+}
+
+/* Progress bar progress styling */
+.shrine-progress-bar-done {
+  height: 100%;
+  border-radius: 1.5em;
+  background-color: {{ progress_bar_color }};
+  background-image: linear-gradient(
+    45deg, 
+    {{ progress_bar_color }} 25%, 
+    {{ progress_bar_color | color_lighten: 20 }} 25%, 
+    {{ progress_bar_color | color_lighten: 20 }} 50%, 
+    {{ progress_bar_color }} 50%, 
+    {{ progress_bar_color }} 75%, 
+    {{ progress_bar_color | color_lighten: 20 }} 75%, 
+    {{ progress_bar_color | color_lighten: 20 }} 100%
+  );
+  background-size: 40px 40px;
+  animation: progress-bar-zebra-stripes 2s linear infinite;
+}
+
+/* Zebra stripe animation */
+@keyframes progress-bar-zebra-stripes {
+  0% {
+    background-position: 0 0;
+  }
+  100% {
+    background-position: 40px 0;
+  }
+}
+
+/* Icon positioning */
+.shrine-progress-icon {
+  position: absolute;
+  top: -10px;
+  transform: translate(-50%, -50%);
+  z-index: 1;
+}
+
+.shrine-progress-icon img {
+  background-color: #fff;
+  border: 2px solid {{ icon_color }};
+  border-radius: 50%;
+  padding: 0.25em;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+</style>

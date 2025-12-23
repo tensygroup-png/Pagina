@@ -1,0 +1,228 @@
+
+
+
+<div {{ block.shopify_attributes }}>
+  {%- if product != blank -%}
+    {%- liquid
+      assign gift_card_recipient_feature_active = false
+      if block.settings.show_gift_card_recipient and product.gift_card?
+        assign gift_card_recipient_feature_active = true
+      endif
+
+      assign show_dynamic_checkout = false
+      if block.settings.show_dynamic_checkout and gift_card_recipient_feature_active == false
+        assign show_dynamic_checkout = true
+      endif
+    -%}
+
+    <product-form
+      class="product-form"
+      data-hide-errors="{{ gift_card_recipient_feature_active }}"
+      data-section-id="{{ section.id }}"
+    >
+      <div class="product-form__error-message-wrapper" role="alert" hidden>
+        <span class="svg-wrapper">
+          {{- 'icon-error.svg' | inline_asset_content -}}
+        </span>
+        <span class="product-form__error-message"></span>
+      </div>
+
+      {%- form 'product',
+        product,
+        id: product_form_id,
+        class: 'form',
+        novalidate: 'novalidate',
+        data-type: 'add-to-cart-form'
+      -%}
+        <input
+          type="hidden"
+          name="id"
+          value="{{ product.selected_or_first_available_variant.id }}"
+          {% if product.selected_or_first_available_variant.available == false
+            or quantity_rule_soldout
+            or product.selected_or_first_available_variant == null
+          %}
+            disabled
+          {% endif %}
+          class="product-variant-id"
+          {% if block.settings.skip_cart %} data-skip-cart="true" {% endif %}
+        >
+
+        {%- if gift_card_recipient_feature_active -%}
+          {%- render 'gift-card-recipient-form', product: product, form: form, section: section -%}
+        {%- endif -%}
+
+        <div class="product-form__buttons{% if block.settings.uppercase_text %} product-form__buttons--uppercase{% endif %}">
+          {%- liquid
+            assign check_against_inventory = true
+            if product.selected_or_first_available_variant.inventory_management != 'shopify' or product.selected_or_first_available_variant.inventory_policy == 'continue'
+              assign check_against_inventory = false
+            endif
+            if product.selected_or_first_available_variant.quantity_rule.min > product.selected_or_first_available_variant.inventory_quantity and check_against_inventory
+              assign quantity_rule_soldout = true
+            endif
+          -%}
+
+          <style>
+            /* Main Button Styling */
+            #ProductSubmitButton-{{ section_id }} {
+              position: relative;
+              transition: all 0.3s ease;
+              padding: 12px 24px;
+              background-color: {% if block.settings.enable_custom_color and block.settings.custom_color %}{{ block.settings.custom_color }}{% else %}{{ settings.primary_button_color | default: '#1a73e8' }}{% endif %};
+              color: {{ settings.add_to_cart_text_color | default: '#FFFFFF' }};
+              font-weight: {{ settings.add_to_cart_font_weight | default: 'bold' }};
+              font-family: {{ settings.add_to_cart_font_family | default: 'Arial, sans-serif' }};
+              font-size: {{ settings.add_to_cart_font_size | default: '16px' }};
+              text-transform: {% if block.settings.uppercase_text %}uppercase{% else %}none{% endif %};
+              border-radius: {{ block.settings.product_button_border_radius | default: 8 }}px;  /* Dynamically set the radius */
+              border: {% if block.settings.product_button_border_thickness > 0 %}{{ block.settings.product_button_border_thickness }}px solid {{ block.settings.product_button_border_color | default: '#000000' }}{% else %}none{% endif %}; /* Apply border thickness and color */
+              box-shadow: {{ block.settings.product_button_shadow_horizontal_offset | default: 0 }}px {{ block.settings.product_button_shadow_vertical_offset | default: 4 }}px {{ block.settings.product_button_shadow_blur | default: 5 }}px rgba(0, 0, 0, {{ block.settings.product_button_shadow_opacity | default: 0.6 }}); /* Shadow settings */
+              outline: none;
+            }
+
+            /* Secondary Button Styling */
+            #SectionAtcBtn-{{ section_id }} {
+              padding: 12px 24px;
+              background-color: {% if block.settings.secondary_btn_enable_custom_color and block.settings.secondary_btn_custom_color %}{{ block.settings.secondary_btn_custom_color }}{% else %}{{ settings.secondary_button_color | default: '#e91e63' }}{% endif %};
+              color: {{ settings.secondary_button_text_color | default: '#FFFFFF' }};
+              font-weight: {{ settings.secondary_button_font_weight | default: 'bold' }};
+              font-family: {{ settings.secondary_button_font_family | default: 'Arial, sans-serif' }};
+              font-size: {{ settings.secondary_button_font_size | default: '16px' }};
+              border-radius: {{ block.settings.product_button_border_radius | default: 8 }}px; /* Apply border-radius dynamically */
+              border: {% if block.settings.product_button_border_thickness > 0 %}{{ block.settings.product_button_border_thickness }}px solid {{ block.settings.product_button_border_color | default: '#000000' }}{% else %}none{% endif %}; /* Apply border thickness and color */
+              transition: all 0.3s ease;
+              cursor: pointer;
+            }
+          </style>
+
+          <!-- Main ATC Button -->
+         <button
+  id="ProductSubmitButton-{{ section_id }}"
+  type="submit"
+  name="add"
+  class="product-form__submit button button--full-width {% if show_dynamic_checkout %}button--secondary{% else %}button--primary{% endif %}"
+  {% if product.selected_or_first_available_variant.available == false or quantity_rule_soldout %}
+    disabled
+  {% endif %}
+  data-base-price="{{ product.selected_or_first_available_variant.price | money_without_currency }}"
+>
+  <span>
+    {%- if product.selected_or_first_available_variant == null -%}
+      {{ 'products.product.unavailable' | t }}
+    {%- elsif product.selected_or_first_available_variant.available == false or quantity_rule_soldout -%}
+      {{ 'products.product.sold_out' | t }}
+    {%- else -%}
+      <!-- Dynamically set the button text from the settings -->
+      {{ block.settings.add_to_cart_text | default: 'ADD TO CART' }}
+      {%- if block.settings.display_price -%}
+        - <span id="total-price">{{ product.selected_or_first_available_variant.price | money }}</span>
+      {%- endif -%}
+    {%- endif -%}
+  </span>
+  {%- render 'loading-spinner' -%}
+</button>
+
+          <!-- Secondary Skip Cart Button with AJAX Checkout -->
+          {% if block.settings.enable_secondary_btn %}
+            <button
+              id="SectionAtcBtn-{{ section.id }}"
+              type="button"
+              class="button button--secondary button--full-width product-form__submit"
+              onclick="addToCartAndCheckout()"
+            >
+              <span class="button__label">{{ block.settings.secondary_btn_label | default: 'Buy It Now' }}</span>
+            </button>
+          {% endif %}
+
+          <!-- Dynamic Checkout Button -->
+          {% if show_dynamic_checkout %}
+            {{ form | payment_button }}
+          {% endif %}
+        </div>
+      {%- endform -%}
+    </product-form>
+  {%- else -%}
+    <div class="product-form">
+      <div class="product-form__buttons form">
+        <button
+          type="submit"
+          name="add"
+          class="product-form__submit button button--full-width button--primary"
+          disabled
+        >
+          {{ 'products.product.sold_out' | t }}
+        </button>
+      </div>
+    </div>
+  {%- endif -%}
+
+  {%- if show_pickup_availability -%}
+    {{ 'component-pickup-availability.css' | asset_url | stylesheet_tag }}
+    {%- assign pick_up_availabilities = product.selected_or_first_available_variant.store_availabilities | where: 'pick_up_enabled', true -%}
+    <pickup-availability
+      class="product__pickup-availabilities quick-add-hidden"
+      {% if product.selected_or_first_available_variant.available and pick_up_availabilities.size > 0 %}
+        available
+      {% endif %}
+      data-root-url="{{ routes.root_url }}"
+      data-variant-id="{{ product.selected_or_first_available_variant.id }}"
+      data-has-only-default-variant="{{ product.has_only_default_variant }}"
+    >
+      <template>
+        <pickup-availability-preview class="pickup-availability-preview">
+          <span class="svg-wrapper">
+            {{- 'icon-unavailable.svg' | inline_asset_content -}}
+          </span>
+          <div class="pickup-availability-info">
+            <p class="caption-large">{{ 'products.product.pickup_availability.unavailable' | t }}</p>
+            <button class="pickup-availability-button link link--text underlined-link">
+              {{ 'products.product.pickup_availability.refresh' | t }}
+            </button>
+          </div>
+        </pickup-availability-preview>
+      </template>
+    </pickup-availability>
+    <script src="{{ 'pickup-availability.js' | asset_url }}" defer="defer"></script>
+  {%- endif -%}
+</div>
+
+<script>
+  function addToCartAndCheckout() {
+    // Zugriff auf die Varianten-ID und die gewählte Menge
+    let variantId = document.querySelector('.product-variant-id').value;
+    let quantity = parseInt(document.querySelector('[name="quantity"]').value) || 1; // Standardmäßig 1, falls kein Mengenfeld vorhanden ist
+
+    fetch('/cart/add.js', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        id: variantId,
+        quantity: quantity // Verwenden der ausgewählten Menge
+      }) 
+    })
+    .then(response => {
+      if (!response.ok) {
+        throw new Error('Network response was not ok');
+      }
+      return response.json();
+    })
+    .then(data => {
+      window.location.href = '/checkout';
+    })
+    .catch(error => {
+      console.error('There was a problem with the fetch operation:', error);
+    });
+  }
+
+  // Skip Cart Funktion - wenn skip_cart aktiviert ist, direkt zum Checkout weiterleiten
+  {% if block.settings.skip_cart %}
+    document.querySelector('#ProductSubmitButton-{{ section.id }}').addEventListener('click', function(event) {
+      event.preventDefault(); // Verhindern der Standardaktion
+      addToCartAndCheckout(); // Aufruf der Funktion zum Hinzufügen zum Warenkorb und Weiterleitung zum Checkout
+    });
+  {% endif %}
+</script>
+

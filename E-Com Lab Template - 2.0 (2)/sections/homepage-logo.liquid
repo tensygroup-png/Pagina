@@ -1,0 +1,57 @@
+{% schema %}
+{
+  "name": "Homepage Logo Section",
+  "settings": [
+    {
+      "type": "image_picker",
+      "id": "logo_image",
+      "label": "Upload Logo Image"
+    },
+    {
+      "type": "text",
+      "id": "logo_alt_text",
+      "label": "Alt Text for Logo",
+      "default": "Website Logo"
+    },
+    {
+      "type": "range",
+      "id": "logo_size",
+      "label": "Logo Size",
+      "min": 50,
+      "max": 500,
+      "default": 100,
+      "step": 50
+    },
+    {
+      "type": "color",
+      "id": "logo_bg_color",
+      "label": "Background Color for Logo Section",
+      "default": "#ffffff"
+    }
+  ],
+  "presets": [
+    {
+      "name": "Homepage Logo Section",
+      "category": "Custom"
+    }
+  ]
+}
+{% endschema %}
+
+<div class="homepage-logo-section" style="background-color: {{ section.settings.logo_bg_color }};">
+  {% if section.settings.logo_image %}
+    <img src="{{ section.settings.logo_image | img_url: '200x' }}" alt="{{ section.settings.logo_alt_text }}" style="width: {{ section.settings.logo_size }}px; height: auto;">
+  {% endif %}
+</div>
+
+<style>
+.homepage-logo-section {
+  text-align: center;
+  padding: 20px 0;
+}
+
+.homepage-logo-section img {
+  max-width: 100%;
+  height: auto;
+}
+</style>

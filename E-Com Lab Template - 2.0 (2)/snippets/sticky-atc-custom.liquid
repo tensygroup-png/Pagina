@@ -1,0 +1,634 @@
+{% comment %}
+  Renders sticky product add to cart button.
+  Accepts:
+  - product: {Object} product object.
+  - block: {Object} passing the block information.
+  - product_form_id: {String} product form id.
+  - section_id: {String} id of section to which this snippet belongs.
+
+  Usage:
+  {% render 'sticky-atc-custom', block: block, product: product, product_form_id: product_form_id, section_id: section.id %}
+{% endcomment %}
+
+{% if settings.enable_sticky_atc %}
+{% assign has_variants = true %}
+{% if product.options.size == 1 and product.options.first == 'Title' %}
+  {% assign has_variants = false %}
+{% endif %}
+    
+<div
+  class="product-form sticky-atc{% unless settings.enable_atc_slide_out %} always-visible{% endunless %} quick-add-hidden"
+  data-hide-errors="{{ gift_card_recipient_feature_active }}"
+  data-section-id="{{ section.id }}"
+  data-desktop-position="{{ settings.desktop_sticky_position }}"
+  data-mobile-position="{{ settings.mobile_sticky_position }}"
+>
+  <div class="product-form__error-message-wrapper" role="alert" hidden>
+    <svg
+      aria-hidden="true"
+      focusable="false"
+      class="icon icon-error"
+      viewBox="0 0 13 13"
+    >
+      <circle cx="6.5" cy="6.50049" r="5.5" stroke="white" stroke-width="2"/>
+      <circle cx="6.5" cy="6.5" r="5.5" fill="#EB001B" stroke="#EB001B" stroke-width="0.7"/>
+      <path d="M5.87413 3.52832L5.97439 7.57216H7.02713L7.12739 3.52832H5.87413ZM6.50076 9.66091C6.88091 9.66091 7.18169 9.37267 7.18169 9.00504C7.18169 8.63742 6.88091 8.34917 6.50076 8.34917C6.12061 8.34917 5.81982 8.63742 5.81982 9.00504C5.81982 9.37267 6.12061 9.66091 6.50076 9.66091Z" fill="white"/>
+      <path d="M5.87413 3.17832H5.51535L5.52424 3.537L5.6245 7.58083L5.63296 7.92216H5.97439H7.02713H7.36856L7.37702 7.58083L7.47728 3.537L7.48617 3.17832H7.12739H5.87413ZM6.50076 10.0109C7.06121 10.0109 7.5317 9.57872 7.5317 9.00504C7.5317 8.43137 7.06121 7.99918 6.50076 7.99918C5.94031 7.99918 5.46982 8.43137 5.46982 9.00504C5.46982 9.57872 5.94031 10.0109 6.50076 10.0109Z" fill="white" stroke="#EB001B" stroke-width="0.7">
+    </svg>
+    <span class="product-form__error-message"></span>
+  </div>
+
+  <div class="content-container">
+    <div class="sticky-atc-mobile">
+      <div class="sticky-atc-title-mobile">{{ product.title }}</div>
+      <div class="sticky-atc-mobile-flex">
+
+
+
+        
+        <div class="sticky-atc-mobile-content">
+          <div class="sticky-atc-variants">
+            {% if settings.enable_sticky_atc_variant_picker %}
+              {%- unless product.has_only_default_variant -%}
+                <variant-selects
+                  id="variant-selects-mobile-{{ section.id }}"
+                  class="sticky-atc-variant-selects"
+                  data-section="{{ section.id }}"
+                  {{ block.shopify_attributes }}
+                >
+                  {%- for option in product.options_with_values -%}
+                    {%- liquid
+                      assign swatch_count = option.values | map: 'swatch' | compact | size
+                      assign picker_type = 'dropdown'
+                      if swatch_count > 0 and block.settings.swatch_shape != 'none'
+                        assign picker_type = 'swatch_dropdown'
+                      endif
+                    -%}
+                    <div class="product-form__input product-form__input--dropdown">
+                      <label class="form__label" for="Option-mobile-{{ section.id }}-{{ forloop.index0 }}">
+                        {{ option.name }}
+                      </label>
+                      <div class="select">
+                        {%- if picker_type == 'swatch_dropdown' -%}
+                          <span
+                            data-selected-value
+                            class="dropdown-swatch"
+                          >
+                            {% render 'swatch', swatch: option.selected_value.swatch, shape: block.settings.swatch_shape %}
+                          </span>
+                        {%- endif -%}
+                        <select
+                          id="Option-mobile-{{ section.id }}-{{ forloop.index0 }}"
+                          class="select__select"
+                          name="options[{{ option.name | escape }}]"
+                          form="{{ product_form_id }}"
+                        >
+                          {% render 'product-variant-options',
+                            product: product,
+                            option: option,
+                            block: block,
+                            picker_type: picker_type
+                          %}
+                        </select>
+                        {% render 'icon-caret' %}
+                      </div>
+                    </div>
+                  {%- endfor -%}
+                  <script type="application/json" data-selected-variant>{{ product.selected_or_first_available_variant | json }}</script>
+                </variant-selects>
+              {%- endunless -%}
+            {% else %}
+              <div class="sticky-atc-active-variant">
+                {% unless product.has_only_default_variant %}
+                  {% for option in product.options_with_values %}
+                    <div class="sticky-atc-active-variant__option">
+                      <span class="sticky-atc-active-variant__option-name">{{ option.name }}:</span>
+                      <span class="sticky-atc-active-variant__option-value">{{ product.selected_or_first_available_variant.options[forloop.index0] }}</span>
+                    </div>
+                  {% endfor %}
+                {% endunless %}
+              </div>
+            {% endif %}
+          </div>
+          <div class="sticky-atc-price">
+            <div id="price-mobile-{{ section.id }}" role="status" {{ block.shopify_attributes }}>
+              {%- render 'price',
+                product: product,
+                use_variant: true,
+                show_badges: false
+              -%}
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <div class="sticky-atc-desktop">
+      
+      <div class="sticky-atc-title">
+        <div class="selected-variant-title sticky-atc-title-desktop">{{ product.title }}</div> 
+      </div>
+      <div class="sticky-atc-variants">
+        {% if settings.enable_sticky_atc_variant_picker %}
+          {%- unless product.has_only_default_variant -%}
+            <variant-selects
+              id="variant-selects-desktop-{{ section.id }}"
+              class="sticky-atc-variant-selects"
+              data-section="{{ section.id }}"
+              {{ block.shopify_attributes }}
+            >
+              {%- for option in product.options_with_values -%}
+                {%- liquid
+                  assign swatch_count = option.values | map: 'swatch' | compact | size
+                  assign picker_type = 'dropdown'
+                  if swatch_count > 0 and block.settings.swatch_shape != 'none'
+                    assign picker_type = 'swatch_dropdown'
+                  endif
+                -%}
+                <div class="product-form__input product-form__input--dropdown">
+                  <label class="form__label" for="Option-desktop-{{ section.id }}-{{ forloop.index0 }}">
+                    {{ option.name }}
+                  </label>
+                  <div class="select">
+                    {%- if picker_type == 'swatch_dropdown' -%}
+                      <span
+                        data-selected-value
+                        class="dropdown-swatch"
+                      >
+                        {% render 'swatch', swatch: option.selected_value.swatch, shape: block.settings.swatch_shape %}
+                      </span>
+                    {%- endif -%}
+                    <select
+                      id="Option-desktop-{{ section.id }}-{{ forloop.index0 }}"
+                      class="select__select"
+                      name="options[{{ option.name | escape }}]"
+                      form="{{ product_form_id }}"
+                    >
+                      {% render 'product-variant-options',
+                        product: product,
+                        option: option,
+                        block: block,
+                        picker_type: picker_type
+                      %}
+                    </select>
+                    {% render 'icon-caret' %}
+                  </div>
+                </div>
+              {%- endfor -%}
+              <script type="application/json" data-selected-variant>{{ product.selected_or_first_available_variant | json }}</script>
+            </variant-selects>
+          {%- endunless -%}
+        {% else %}
+          <div class="sticky-atc-active-variant">
+            {% unless product.has_only_default_variant %}
+              {% for option in product.options_with_values %}
+                <div class="sticky-atc-active-variant__option">
+                  <span class="sticky-atc-active-variant__option-name">{{ option.name }}:</span>
+                  <span class="sticky-atc-active-variant__option-value">{{ product.selected_or_first_available_variant.options[forloop.index0] }}</span>
+                </div>
+              {% endfor %}
+            {% endunless %}
+          </div>
+        {% endif %}
+      </div>
+      <div class="sticky-atc-price">
+        <div id="price-desktop-{{ section.id }}" role="status" {{ block.shopify_attributes }}>
+          {%- render 'price',
+            product: product,
+            use_variant: true,
+            show_badges: false
+          -%}
+        </div>
+      </div>
+    </div>
+
+   <div class="atc-button-container">
+      <button
+        type="submit"
+        name="add"
+        form="{{ product_form_id }}"
+        class="product-form__submit button button--full-width button--primary sticky-atc-button"
+        {% if product.selected_or_first_available_variant.available == false or quantity_rule_soldout %}
+          disabled
+        {% endif %}
+      >
+        <span>
+          {%- if product.selected_or_first_available_variant.available == false or quantity_rule_soldout -%}
+            {{ 'products.product.sold_out' | t }}
+          {%- else -%}
+            {{ 'products.product.add_to_cart' | t }}
+          {%- endif -%}
+        </span>
+        {%- render 'loading-spinner' -%}
+      </button>
+    </div>
+  </div>
+</div>
+
+<script>
+  
+  document.addEventListener("DOMContentLoaded", function() {
+      var atcElement = document.querySelector(".sticky-atc");
+      var targetElement = document.querySelector('[id^="ProductSubmitButton-"]');
+      var enableSlideOut = {{ settings.enable_atc_slide_out | json }};
+      var desktopPosition = atcElement.dataset.desktopPosition;
+      var mobilePosition = atcElement.dataset.mobilePosition;
+  
+      function updateStickyPosition() {
+          var isMobile = window.innerWidth < 750;
+          var position = isMobile ? mobilePosition : desktopPosition;
+          atcElement.style.top = position === 'top' ? '-200px' : 'auto';
+          atcElement.style.bottom = position === 'bottom' ? '-200px' : 'auto';
+      }
+  
+      updateStickyPosition();
+      window.addEventListener('resize', updateStickyPosition);
+  
+      if (enableSlideOut) {
+          window.addEventListener("scroll", function() {
+              var isTargetElementOutOfView = targetElement.getBoundingClientRect().top < 0;
+  
+              if (isTargetElementOutOfView) {
+                  atcElement.classList.add('show');
+              } else {
+                  atcElement.classList.remove('show');
+              }
+          });
+      } else {
+          atcElement.classList.add('show');
+      }    
+  });
+
+</script>
+
+<style>
+
+
+  
+  .sticky-atc-content {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .sticky-atc-mobile,
+  .sticky-atc-desktop {
+    width: 100%;
+  }
+
+  #selectedVariantImage-mobile,
+  #selectedVariantImage-desktop {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+.sticky-atc {
+    position: fixed;
+    left: 0;
+    z-index: 2;
+    width: 100%;
+    background-color: var(--sticky-atc-background-color); /* Dynamische Hintergrundfarbe */
+    border: 0px solid #e0e0e0; /* Standardwert für den Rahmen */
+    border-radius: 4px; /* Standardwert für die abgerundeten Ecken */
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1); /* Standardwert für Schatten */
+    padding: 0px; /* Standardwert für Innenabstand */
+    transition: top 0.3s ease-out, bottom 0.3s ease-out;
+}
+
+@media (max-width: 749px) {
+    :root {
+        --sticky-atc-background-color: {{ settings.sticky_atc_mobile_background_color }};
+    }
+}
+
+@media (min-width: 750px) {
+    :root {
+        --sticky-atc-background-color: {{ settings.sticky_atc_desktop_background_color }};
+    }
+}
+
+
+
+
+  .sticky-atc.show {
+    top: auto;
+    bottom: auto;
+  }
+
+  .sticky-atc.always-visible {
+    top: auto !important;
+    bottom: auto !important;
+  }
+
+
+
+  
+  .sticky-atc .sticky-atc-variant-selects {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+  }
+
+  .sticky-atc-active-variant {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0 20px;
+  }
+
+  .sticky-atc-active-variant__option {
+    font-size: 14px;
+    color: rgb(var(--color-foreground));
+  }
+
+  .sticky-atc-active-variant__option-name {
+    font-size: 14px; /* Schriftgröße */
+    margin-right: 5px; /* Abstand zum Dropdown */
+    align-self: center; /* Vertikale Zentrierung */
+    display: inline-block;
+}
+
+  .sticky-atc-active-variant__option-value {
+    color: rgb(var(--color-foreground));
+  }
+
+  .sticky-atc-variants select {
+    width: auto; /* Passt die Breite an den Inhalt an */
+    max-width: 150px; /* Begrenzung der maximalen Breite */
+    height: 2.5rem; /* Höhe des Dropdowns */
+    font-size: 14px; /* Schriftgröße */
+    padding: 0 10px; /* Abstand innen, links und rechts */
+    border: none; /* Entfernt die Umrandung */
+    border-radius: 0; /* Entfernt abgerundete Ecken */
+    background-color: transparent; /* Hintergrundfarbe entfernen */
+    display: flex;
+    align-items: center; /* Vertikale Zentrierung */
+    justify-content: center; /* Horizontale Zentrierung */
+    text-align: center; /* Zentriert den Text */
+}
+
+.sticky-atc .product-form__input--dropdown {
+    width: auto; /* Automatische Breite */
+    max-width: 200px; /* Begrenzung der Breite */
+    display: flex;
+    align-items: center; /* Vertikale Zentrierung der Labels */
+    margin-right: 20px; /* Erhöht den Abstand zwischen Color und Size */
+    gap: 8px; /* Abstand zwischen Label und Dropdown */
+}
+
+
+  .sticky-atc-price {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+
+  .atc-button-container .form {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .product-form__buttons.sticky-product-form__buttons {
+    width: 100%;
+  }
+
+  .atc-button-container .product-form__submit {
+    margin: 1rem 0;
+  }
+
+  .atc-button-container .button {
+    color: {{ settings.atc_button_text_border_color }};
+    background-color: {{ settings.atc_button_background_color }};
+  }
+  .atc-button-container .button:after {
+    box-shadow: 0 0 0 calc(var(--buttons-border-width) + var(--border-offset))
+        rgba(var(--color-button-text), var(--border-opacity)),
+      0 0 0 var(--buttons-border-width) {{ settings.atc_button_text_border_color }};
+  }
+  
+  @media (max-width: 749px) {
+    .sticky-atc-desktop {
+      display: none;
+    }
+
+    .sticky-atc.show, 
+    .sticky-atc.always-visible {
+      {% if settings.mobile_sticky_position == "top" %}
+        top: {{ settings.mobile_sticky_top_offset }}px !important;
+        bottom: auto !important;
+      {% else %}
+        bottom: 0 !important;
+        top: auto !important;
+      {% endif %}
+    }
+    
+    .sticky-atc-mobile-content {
+      flex: 0 0 75%;
+    }
+
+   .sticky-atc-mobile-flex {
+    display: flex;
+    align-items: center; /* Zentriert die Elemente vertikal */
+    gap: 5px; /* Weniger Abstand zwischen den Elementen */
+    margin: 0 5px; /* Weniger äußerer Abstand */
+    justify-content: space-between; /* Elemente gleichmäßig aufteilen */
+}
+    
+    .sticky-atc-image {
+      flex: 0 0 {{ settings.sticky_atc_mobile_img_width }}%;
+      max-width: 120px;
+    }
+
+    .sticky-atc-title-mobile {
+    display: none; /* Versteckt Titel, Preis und Varianten-Auswahl auf mobilen Geräten */
+  }
+    
+    .sticky-atc .product-form__input--dropdown {
+      width: 100%;
+      max-width: none;
+      display: flex;
+      align-items: center;
+    }
+
+    .sticky-atc .product-form__input--dropdown .form__label {
+      flex: 0 0 auto;
+      width: 20%;
+      margin-right: 10px;
+      margin-bottom: 0;
+      font-size: 1.2rem;
+    }
+
+    .sticky-atc .product-form__input--dropdown .select {
+      flex: 1 1 auto;
+    }
+
+    .sticky-atc .product-form__input--dropdown select {
+      width: 100%;
+      height: 2.8rem;
+    }
+
+    .sticky-atc-variants {
+    
+    display: none; /* Versteckt Titel, Preis und Varianten-Auswahl auf mobilen Geräten */
+  }
+
+    .sticky-atc-active-variant {
+      display: block;
+    }
+  
+    .sticky-atc-active-variant__option {
+      display: block;
+      line-height: normal;
+    }
+  
+    .sticky-atc-active-variant__option-name,
+    .sticky-atc-active-variant__option-value {
+      display: inline-block;
+    }
+  
+    .sticky-atc-price {
+    display: none; /* Versteckt Titel, Preis und Varianten-Auswahl auf mobilen Geräten */
+  }
+
+    .sticky-atc-mobile .sticky-atc-price .price__container {
+      color: {{ settings.sticky_atc_price_font_color }};
+      font-size: {{ settings.sticky_atc_price_font_size }}rem;
+      font-weight: {% if settings.sticky_atc_price_font_style == 'bold' or settings.sticky_atc_price_font_style == 'bold_italic' %}bold{% else %}normal{% endif %};
+      font-style: {% if settings.sticky_atc_price_font_style == 'italic' or settings.sticky_atc_price_font_style == 'bold_italic' %}italic{% else %}normal{% endif %};
+    }
+
+    .atc-button-container {
+      margin: 0 0px;
+    }
+    
+    .atc-button-container .product-form__submit {
+      margin: 0;
+    }
+    
+  }
+
+  @media (min-width: 750px) {
+
+    .sticky-atc {
+      padding: 10px 20px;
+    }
+    
+    .sticky-atc-mobile {
+      display: none;
+    }
+
+    .sticky-atc.show, 
+    .sticky-atc.always-visible {
+      {% if settings.desktop_sticky_position == "top" %}
+        top: {{ settings.desktop_sticky_top_offset }}px !important;
+        bottom: auto !important;
+      {% else %}
+        bottom: 0 !important;
+        top: auto !important;
+      {% endif %}
+    }
+    
+    .sticky-atc .content-container {
+      display: flex;
+      flex-direction: row;
+      align-items: center;
+      gap: 20px;
+    }
+
+    .sticky-atc-desktop {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+      flex: 1;
+    }
+
+    .sticky-atc-image {
+      flex: 0 0 {{ settings.sticky_atc_desktop_img_width }}%;
+      min-width: 50px;
+      max-width: 75px; 
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    
+    #selectedVariantImage-desktop {
+      width: 100%;
+      height: 100%;
+      object-fit: contain; 
+      max-width: 100%; 
+      max-height: 100%;
+    }
+
+    .sticky-atc-title {
+      /* flex: 0 0 25%; */
+    }
+
+    .sticky-atc-variants {
+      flex: 0 0 50%;
+    }
+
+    .sticky-atc-price {
+      flex: 0 0 15%;
+    }
+
+    .atc-button-container {
+      flex: 0 0 20%;
+      max-width: 40rem;
+    }
+
+    .sticky-atc-title-desktop {
+      font-size: {{ settings.sticky_atc_title_font_size }}rem;
+      font-weight: {% if settings.sticky_atc_title_font_style == 'bold' or settings.sticky_atc_title_font_style == 'bold_italic' %}bold{% else %}normal{% endif %};
+      font-style: {% if settings.sticky_atc_title_font_style == 'italic' or settings.sticky_atc_title_font_style == 'bold_italic' %}italic{% else %}normal{% endif %};
+      color: rgb(var(--color-foreground));
+    }
+        
+    .sticky-atc-desktop .sticky-atc-price .price__container {
+      color: {{ settings.sticky_atc_price_font_color }};
+      font-size: {{ settings.sticky_atc_price_font_size }}rem;
+      font-weight: {% if settings.sticky_atc_price_font_style == 'bold' or settings.sticky_atc_price_font_style == 'bold_italic' %}bold{% else %}normal{% endif %};
+      font-style: {% if settings.sticky_atc_price_font_style == 'italic' or settings.sticky_atc_price_font_style == 'bold_italic' %}italic{% else %}normal{% endif %};
+    }
+    
+    .sticky-atc .sticky-atc-variant-selects {
+      flex-direction: row;
+      flex-wrap: nowrap;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .sticky-atc .product-form__input--dropdown {
+    max-width: 150px; /* Reduzierte Containerbreite */
+}
+
+  }
+
+  @media (min-width: 990px) {
+    {% if settings.desktop_sticky_position == "top" %}
+    .sticky-atc.show {
+      top: {{ settings.desktop_sticky_top_offset }}px;
+    }
+    {% endif %}
+
+    .sticky-atc-active-variant {
+      gap: 0 40px;
+    }
+  }
+
+  @media (min-width: 750px) and (max-width: 1099px) {
+      .sticky-atc-variants {
+        flex: 0 0 40%;
+      }
+  }
+
+  @media (min-width: 1440px) {
+
+    .sticky-atc {
+      padding: 10px 40px;
+    }
+  }
+</style>
+
+{% endif %}

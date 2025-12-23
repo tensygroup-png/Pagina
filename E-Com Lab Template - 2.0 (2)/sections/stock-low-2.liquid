@@ -1,0 +1,365 @@
+{% schema %}
+{
+  "name": "Low Stock Counter",
+  "settings": [
+    {
+  "type": "richtext",
+  "id": "note_text",
+  "label": "Note Text",
+  "default": "<p>Note:</p>"
+},
+{
+  "type": "color",
+  "id": "note_text_color",
+  "label": "Note Text Color",
+  "default": "#FF0000"
+},
+
+    {
+      "type": "richtext",
+      "id": "stock_text_before",
+      "label": "Stock Text Before Amount",
+      "default": "<p>In stock:</p>"
+    },
+    {
+      "type": "richtext",
+      "id": "stock_text_after",
+      "label": "Stock Text After Amount",
+      "default": "<p>units left</p>"
+    },
+    {
+      "type": "number",
+      "id": "stock_amount",
+      "label": "Stock Amount",
+      "default": 270
+    },
+    {
+      "type": "range",
+      "id": "padding_top_bottom",
+      "label": "Padding Top and Bottom",
+      "min": 0,
+      "max": 50,
+      "step": 1,
+      "default": 1,
+      "unit": "px"
+    },
+    {
+      "type": "range",
+      "id": "font_size",
+      "label": "Font Size (px)",
+      "min": 10,
+      "max": 50,
+      "step": 1,
+      "default": 16
+    },
+    {
+      "type": "radio",
+      "id": "amount_position",
+      "label": "Amount Position",
+      "default": "before",
+      "options": [
+        {
+          "value": "before",
+          "label": "Before Text"
+        },
+        {
+          "value": "after",
+          "label": "After Text"
+        }
+      ]
+    },
+    {
+      "type": "color",
+      "id": "stock_text_before_color",
+      "label": "Stock Text Before Color",
+      "default": "#FF0000"
+    },
+    {
+      "type": "color",
+      "id": "stock_text_after_color",
+      "label": "Stock Text After Color",
+      "default": "#FF0000"
+    },
+    {
+      "type": "color",
+      "id": "stock_amount_color",
+      "label": "Stock Amount Color",
+      "default": "#FF0000"
+    },
+    {
+      "type": "color",
+      "id": "outer_dot_color",
+      "label": "Outer Circle Color",
+      "default": "#3ed660"
+    },
+    {
+      "type": "color",
+      "id": "inner_dot_color",
+      "label": "Inner Circle Color",
+      "default": "#3ed660"
+    },
+    {
+      "type": "range",
+      "id": "dot_size",
+      "label": "Dot Size",
+      "min": 10,
+      "max": 50,
+      "step": 1,
+      "default": 15,
+      "unit": "px"
+    },
+    {
+      "type": "range",
+      "id": "min_decrement",
+      "label": "Minimum Stock Decrement",
+      "min": 1,
+      "max": 10,
+      "step": 1,
+      "default": 1
+    },
+    {
+      "type": "range",
+      "id": "max_decrement",
+      "label": "Maximum Stock Decrement",
+      "min": 1,
+      "max": 20,
+      "step": 1,
+      "default": 7
+    },
+    {
+      "type": "range",
+      "id": "decrement_speed",
+      "label": "Decrement Speed (1 = Fast, 5 = Slow)",
+      "min": 1,
+      "max": 5,
+      "step": 1,
+      "default": 3
+    },
+    {
+      "type": "radio",
+      "id": "font_weight",
+      "label": "Font Weight for Text",
+      "default": "normal",
+      "options": [
+        {
+          "value": "normal",
+          "label": "Normal"
+        },
+        {
+          "value": "bold",
+          "label": "Bold"
+        }
+      ]
+    },
+    {
+      "type": "radio",
+      "id": "stock_amount_font_weight",
+      "label": "Font Weight for Stock Amount",
+      "default": "bold",
+      "options": [
+        {
+          "value": "normal",
+          "label": "Normal"
+        },
+        {
+          "value": "bold",
+          "label": "Bold"
+        }
+      ]
+    },
+    {
+      "type": "select",
+      "id": "font_type",
+      "label": "Font Type",
+      "options": [
+        {
+          "value": "Arial, sans-serif",
+          "label": "Arial"
+        },
+        {
+          "value": "Verdana, sans-serif",
+          "label": "Verdana"
+        },
+        {
+          "value": "Poppins, sans-serif",
+          "label": "Poppins"
+        },
+        {
+          "value": "Roboto, sans-serif",
+          "label": "Roboto"
+        }
+      ],
+      "default": "Arial, sans-serif"
+    },
+    {
+      "type": "paragraph",
+      "content": "Copy the following HTML code into the Custom Liquid Block where you want the counter to display:\n\n<div data-low-stock-counter-target></div>"
+    }
+  ],
+  "presets": [
+    {
+      "name": "Low Stock Counter",
+      "category": "Custom"
+    }
+  ]
+}
+
+
+{% endschema %}
+<div id="low-stock-counter-content" style="display: none;">
+  <div class="low-stock-counter" role="status">
+    <!-- Pulsing Dot -->
+    <svg width="{{ section.settings.dot_size }}" height="{{ section.settings.dot_size }}" aria-hidden="true" class="pulsing-dot">
+      <circle class="outer-circle" cx="50%" cy="50%" r="50%" fill="{{ section.settings.outer_dot_color }}"></circle>
+      <circle class="inner-circle" cx="50%" cy="50%" r="30%" stroke="rgb(255, 255, 255)" stroke-width="1" fill="{{ section.settings.inner_dot_color }}"></circle>
+    </svg>
+    <div class="pulsing-dot-container">
+      <div class="pulsing-dot"></div>
+    </div>
+
+    <span class="stock-text">
+      <!-- Adding Note Text Before -->
+      <span class="rich-text stock-text-note" style="color: {{ section.settings.note_text_color }};">
+        {{ section.settings.note_text }}
+      </span>
+
+      {% if section.settings.amount_position == 'before' %}
+        <span class="rich-text stock-text-before" style="color: {{ section.settings.stock_text_before_color }};">
+          {{ section.settings.stock_text_before }}
+        </span>
+        <span class="stock-count" style="font-size: {{ section.settings.font_size }}px; font-weight: {{ section.settings.stock_amount_font_weight }}; color: {{ section.settings.stock_amount_color }};">
+          {{ section.settings.stock_amount }}
+        </span>
+        <span class="rich-text stock-text-after" style="color: {{ section.settings.stock_text_after_color }};">
+          {{ section.settings.stock_text_after }}
+        </span>
+      {% else %}
+        <span class="rich-text stock-text-before" style="color: {{ section.settings.stock_text_before_color }};">
+          {{ section.settings.stock_text_before }}
+        </span>
+        <span class="rich-text stock-text-after" style="color: {{ section.settings.stock_text_after_color }};">
+          {{ section.settings.stock_text_after }}
+        </span>
+        <span class="stock-count" style="font-size: {{ section.settings.font_size }}px; font-weight: {{ section.settings.stock_amount_font_weight }}; color: {{ section.settings.stock_amount_color }};">
+          {{ section.settings.stock_amount }}
+        </span>
+      {% endif %}
+    </span>
+  </div>
+</div>
+
+<style>
+#low-stock-counter-content {
+  display: none;
+  height: 20px; /* Set the height to 30px */
+  overflow: hidden; /* Ensure nothing spills over */
+}
+
+.low-stock-counter {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  white-space: nowrap;
+  padding-top: 0px;
+  padding-bottom: 0px;
+  margin-top: 0px;
+  margin-bottom: 0px;
+  height: 20px; /* Set the height to match the container */
+}
+
+.stock-text {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+}
+
+.stock-text-before, .stock-text-after {
+  margin-right: 0px;
+}
+
+.stock-text {
+  font-size: {{ section.settings.font_size }}px;
+  font-weight: {{ section.settings.font_weight }};
+  color: {{ section.settings.stock_text_color }};
+  font-family: {% if section.settings.font_type == 'Arial, sans-serif' %} 'Arial', sans-serif {% elsif section.settings.font_type == 'Verdana, sans-serif' %} 'Verdana', sans-serif {% elsif section.settings.font_type == 'Poppins, sans-serif' %} 'Poppins', sans-serif {% else %} 'Roboto', sans-serif {% endif %};
+  margin: 0;
+}
+
+.stock-count {
+  font-weight: {{ section.settings.stock_amount_font_weight }};
+  margin: 0;
+}
+
+.pulsing-dot-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-right: 3px;
+}
+
+.pulsing-dot {
+  width: {{ section.settings.dot_size }}px;
+  height: {{ section.settings.dot_size }}px;
+  border-radius: 50%;
+  background-color: {{ section.settings.outer_dot_color }};
+  animation: pulse 1.5s infinite;
+}
+
+@keyframes pulse {
+  0% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1.2);
+    opacity: 0.7;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+
+</style>
+
+
+
+
+
+<script>
+  document.addEventListener("DOMContentLoaded", function() {
+    // Überprüfen, ob wir im Theme-Editor sind
+    const isThemeEditor = Shopify.designMode;
+
+    // Setzen der Stock-Werte aus den Einstellungen
+    let stockCount = {{ section.settings.stock_amount }}; // Start from stock amount from settings
+    const minDecrement = {{ section.settings.min_decrement }}; // Minimum decrement
+    const maxDecrement = {{ section.settings.max_decrement }}; // Maximum decrement
+    const decrementSpeed = 6 - {{ section.settings.decrement_speed }}; // Convert speed to interval, 1 = fast, 5 = slow
+    const minStockAmount = 3; // Minimum stock value before reset
+
+    function getRandomDecrement() {
+      return Math.floor(Math.random() * (maxDecrement - minDecrement + 1)) + minDecrement;
+    }
+
+    function updateStockCount() {
+      // Wenn der Zähler über 3 liegt, wird er weiter reduziert
+      if (stockCount > minStockAmount) {
+        let decrementAmount = getRandomDecrement(); // Get a random decrement value
+        stockCount -= decrementAmount; // Subtract from stock
+        document.querySelector('.stock-count').textContent = stockCount; // Update stock count on the page
+      } else {
+        // Wenn der Zähler bei oder unter 3 ist, wird er auf den ursprünglichen Wert zurückgesetzt
+        stockCount = {{ section.settings.stock_amount }}; // Reset to original stock amount
+        document.querySelector('.stock-count').textContent = stockCount; // Update stock count
+      }
+    }
+
+    // Sofort den Zählerinhalt nach dem Laden der Seite anzeigen
+    document.querySelector('[data-low-stock-counter-target]').innerHTML = document.getElementById('low-stock-counter-content').innerHTML;
+    
+    // Starten des Zähler-Countdowns sofort ohne Verzögerung
+    const stockInterval = setInterval(updateStockCount, decrementSpeed * 1000);
+  });
+</script>

@@ -1,0 +1,318 @@
+<section class="emoji-features-section" style="
+    background-color: {{ section.settings.section_background_color }};
+">
+  <div class="emoji-features-container">
+    <h2 style="color: {{ section.settings.heading_color }};">{{ section.settings.heading }}</h2>
+    <div class="emoji-features-grid">
+      {% for i in (1..section.settings.number_of_cards) %}
+      <!-- Feature {{ i }} -->
+      <div class="emoji-feature-item {% if section.settings.enable_glow %} glow {% endif %}" style="background-color: {{ section.settings.card_background_color }}; box-shadow: {% if section.settings.enable_glow %} 0 0 20px {{ section.settings.card_glow_color }}; {% endif %}">
+        <div class="emoji-icon {% if section.settings.enable_emoji_glow %} emoji-glow {% endif %}" style="
+            color: {{ section.settings.emoji_fill_color }};
+            font-size: {{ section.settings.emoji_size }}px;
+            text-shadow: {% if section.settings.enable_filter %} -1px -1px 0 {{ section.settings.emoji_outline_color }}, 1px -1px 0 {{ section.settings.emoji_outline_color }}, -1px 1px 0 {{ section.settings.emoji_outline_color }}, 1px 1px 0 {{ section.settings.emoji_outline_color }} {% endif %};
+            text-shadow: {% if section.settings.enable_emoji_glow %} 0 0 15px {{ section.settings.emoji_glow_color }}; {% endif %}">
+          {% assign emoji_key = 'emoji_' | append: i %}
+          <span class="emoji">{{ section.settings[emoji_key] }}</span>
+        </div>
+        <h3 style="color: {{ section.settings.title_color }}; font-weight: {{ section.settings.title_font_weight }};">
+          {% assign title_key = 'feature_title_' | append: i %}
+          {{ section.settings[title_key] }}
+        </h3>
+        <p style="color: {{ section.settings.text_color }}; font-weight: {{ section.settings.text_font_weight }};">
+          {% assign description_key = 'feature_description_' | append: i %}
+          {{ section.settings[description_key] }}
+        </p>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+
+<style>
+  .emoji-features-section {
+    text-align: center;
+    padding: 50px;
+    background-color: #F1F5F9;
+  }
+
+  .emoji-features-container {
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+
+  .emoji-features-grid {
+    display: flex;
+    justify-content: space-around;
+    margin-top: 30px;
+    flex-wrap: wrap;
+  }
+
+  .emoji-feature-item {
+    width: 30%;
+    background-color: #FFFFFF;
+    padding: 20px;
+    border-radius: 10px;
+    margin-bottom: 20px;
+    transition: transform 0.3s ease-in-out;
+  }
+
+  .emoji-feature-item:hover {
+    transform: translateY(-10px);
+  }
+
+  .glow {
+    box-shadow: 0 0 20px rgba(255, 255, 0, 0.7);
+  }
+
+  .emoji-icon {
+    margin-bottom: 20px;
+  }
+
+  .emoji-glow {
+    text-shadow: 0 0 15px rgba(255, 255, 0, 0.9);
+  }
+
+  /* Responsive for Mobile */
+  @media (max-width: 768px) {
+    .emoji-feature-item {
+      width: 100%;
+    }
+
+    .emoji-features-grid {
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .emoji-feature-item h3 {
+      font-size: 20px;
+    }
+
+    .emoji-feature-item p {
+      font-size: 14px;
+    }
+
+    .emoji-icon {
+      font-size: 40px;
+    }
+  }
+</style>
+
+{% schema %}
+{
+  "name": "Emoji Features",
+  "settings": [
+    {
+      "type": "text",
+      "id": "heading",
+      "label": "Section Heading",
+      "default": "Why People Love Our Product"
+    },
+    {
+      "type": "color",
+      "id": "heading_color",
+      "label": "Heading Text Color",
+      "default": "#ffffff"
+    },
+    {
+      "type": "color",
+      "id": "section_background_color",
+      "label": "Section Background Color",
+      "default": "#8A4FFF"
+    },
+    {
+      "type": "color",
+      "id": "card_background_color",
+      "label": "Card Background Color",
+      "default": "#ffffff"
+    },
+    {
+      "type": "color",
+      "id": "title_color",
+      "label": "Card Title Color",
+      "default": "#000000"
+    },
+    {
+      "type": "select",
+      "id": "title_font_weight",
+      "label": "Title Font Weight",
+      "default": "bold",
+      "options": [
+        { "value": "normal", "label": "Normal" },
+        { "value": "bold", "label": "Bold" }
+      ]
+    },
+    {
+      "type": "color",
+      "id": "text_color",
+      "label": "Card Text Color",
+      "default": "#000000"
+    },
+    {
+      "type": "select",
+      "id": "text_font_weight",
+      "label": "Text Font Weight",
+      "default": "normal",
+      "options": [
+        { "value": "normal", "label": "Normal" },
+        { "value": "bold", "label": "Bold" }
+      ]
+    },
+    {
+      "type": "text",
+      "id": "emoji_1",
+      "label": "Emoji for Feature 1",
+      "default": "☁️"
+    },
+    {
+      "type": "text",
+      "id": "feature_title_1",
+      "label": "Title for Feature 1",
+      "default": "Support Without the Bulk"
+    },
+    {
+      "type": "textarea",
+      "id": "feature_description_1",
+      "label": "Description for Feature 1",
+      "default": "Built-in arch support keeps your feet feeling fresh without the heavy, bulky feel."
+    },
+    {
+      "type": "text",
+      "id": "emoji_2",
+      "label": "Emoji for Feature 2",
+      "default": "😊"
+    },
+    {
+      "type": "text",
+      "id": "feature_title_2",
+      "label": "Title for Feature 2",
+      "default": "Cute & Professional"
+    },
+    {
+      "type": "textarea",
+      "id": "feature_description_2",
+      "label": "Description for Feature 2",
+      "default": "Stylish enough to wear at work, yet playful enough to show off your personality."
+    },
+    {
+      "type": "text",
+      "id": "emoji_3",
+      "label": "Emoji for Feature 3",
+      "default": "✨"
+    },
+    {
+      "type": "text",
+      "id": "feature_title_3",
+      "label": "Title for Feature 3",
+      "default": "No Laces, No Hassle"
+    },
+    {
+      "type": "textarea",
+      "id": "feature_description_3",
+      "label": "Description for Feature 3",
+      "default": "Just slip them on, and you're ready to go!"
+    },
+    {
+      "type": "text",
+      "id": "emoji_4",
+      "label": "Emoji for Feature 4",
+      "default": "🔥"
+    },
+    {
+      "type": "text",
+      "id": "feature_title_4",
+      "label": "Title for Feature 4",
+      "default": "Hot and Trendy"
+    },
+    {
+      "type": "textarea",
+      "id": "feature_description_4",
+      "label": "Description for Feature 4",
+      "default": "Get the latest styles that are on fire right now."
+    },
+    {
+      "type": "text",
+      "id": "emoji_5",
+      "label": "Emoji for Feature 5",
+      "default": "💡"
+    },
+    {
+      "type": "text",
+      "id": "feature_title_5",
+      "label": "Title for Feature 5",
+      "default": "Bright Ideas"
+    },
+    {
+      "type": "textarea",
+      "id": "feature_description_5",
+      "label": "Description for Feature 5",
+      "default": "Innovative designs that light up your style."
+    },
+    {
+      "type": "color",
+      "id": "emoji_fill_color",
+      "label": "Emoji Fill Color",
+      "default": "#ffffff"
+    },
+    {
+      "type": "color",
+      "id": "emoji_outline_color",
+      "label": "Emoji Outline Color",
+      "default": "#000000"
+    },
+    {
+      "type": "checkbox",
+      "id": "enable_filter",
+      "label": "Enable Emoji Outline Filter",
+      "default": true
+    },
+    {
+      "type": "checkbox",
+      "id": "enable_glow",
+      "label": "Enable Card Glow",
+      "default": false
+    },
+    {
+      "type": "color",
+      "id": "card_glow_color",
+      "label": "Card Glow Color",
+      "default": "#FFFF00"
+    },
+    {
+      "type": "checkbox",
+      "id": "enable_emoji_glow",
+      "label": "Enable Emoji Glow",
+      "default": false
+    },
+    {
+      "type": "color",
+      "id": "emoji_glow_color",
+      "label": "Emoji Glow Color",
+      "default": "#FFFF00"
+    },
+    {
+      "type": "range",
+      "id": "emoji_size",
+      "label": "Emoji Size (px)",
+      "min": 10,
+      "max": 110,
+      "step": 1,
+      "default": 50
+    },
+    {
+      "type": "range",
+      "id": "number_of_cards",
+      "label": "Number of Cards to Display",
+      "min": 1,
+      "max": 5,
+      "default": 3
+    }
+  ],
+  "presets": [
+    {
+      "name": "Emoji Features",
+      "category": "Custom Sections"
+    }
+  ]
+}
+{% endschema %}

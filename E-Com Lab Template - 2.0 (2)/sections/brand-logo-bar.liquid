@@ -1,0 +1,321 @@
+{% schema %}
+{
+  "name": "Brand Logo Bar",
+  "settings": [
+    {
+      "type": "text",
+      "id": "heading",
+      "label": "Section Heading",
+      "default": "Explore Top Fashion Brands"
+    },
+    {
+      "type": "color",
+      "id": "background_color",
+      "label": "Static Background Color",
+      "default": "#3c2d56"
+    },
+    {
+      "type": "color",
+      "id": "gradient_start",
+      "label": "Gradient Start Color",
+      "default": "#3c2d56"
+    },
+    {
+      "type": "color",
+      "id": "gradient_end",
+      "label": "Gradient End Color",
+      "default": "#7a5199"
+    },
+    {
+      "type": "range",
+      "id": "animation_duration",
+      "label": "Gradient Animation Duration (Seconds)",
+      "default": 5,
+      "min": 1,
+      "max": 60,
+      "step": 1,
+      "unit": "s"
+    },
+    {
+      "type": "range",
+      "id": "bar_height",
+      "label": "Bar Height (px)",
+      "default": 50,
+      "min": 20,
+      "max": 150,
+      "step": 2,
+      "unit": "px"
+    },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "label": "Top Padding",
+      "default": 30,
+      "min": 0,
+      "max": 100,
+      "unit": "px"
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "label": "Bottom Padding",
+      "default": 30,
+      "min": 0,
+      "max": 100,
+      "unit": "px"
+    },
+    {
+      "type": "range",
+      "id": "scroll_speed",
+      "label": "Scroll Speed (Seconds)",
+      "default": 20,
+      "min": 5,
+      "max": 60,
+      "unit": "s"
+    },
+    {
+      "type": "select",
+      "id": "scroll_direction",
+      "label": "Scroll Direction",
+      "options": [
+        { "value": "left", "label": "Left to Right" },
+        { "value": "right", "label": "Right to Left" }
+      ],
+      "default": "left"
+    },    {
+      "type": "range",
+      "id": "image_max_height",
+      "label": "Max Image Height (px)",
+      "default": 50,
+      "min": 20,
+      "max": 100,
+      "unit": "px"
+    },
+    {
+      "type": "range",
+      "id": "star_size",
+      "label": "Star Size (px)",
+      "default": 25,
+      "min": 10,
+      "max": 50,
+      "unit": "px"
+    },
+    {
+      "type": "color",
+      "id": "star_color",
+      "label": "Star Color",
+      "default": "#FFFFFF"
+    },
+    {
+      "type": "color",
+      "id": "logo_color",
+      "label": "Logo Color Filter",
+      "default": "#FFFFFF"  // Fixed: Valid default value for color
+    },
+    {
+      "type": "image_picker",
+      "id": "brand_logo_1",
+      "label": "Brand Logo 1"
+    },
+    {
+      "type": "image_picker",
+      "id": "brand_logo_2",
+      "label": "Brand Logo 2"
+    },
+    {
+      "type": "image_picker",
+      "id": "brand_logo_3",
+      "label": "Brand Logo 3"
+    },
+    {
+      "type": "image_picker",
+      "id": "brand_logo_4",
+      "label": "Brand Logo 4"
+    },
+    {
+      "type": "image_picker",
+      "id": "brand_logo_5",
+      "label": "Brand Logo 5"
+    },
+    {
+      "type": "image_picker",
+      "id": "brand_logo_6",
+      "label": "Brand Logo 6"
+    }
+  ],
+  "presets": [
+    {
+      "name": "Brand Logo Bar",
+      "category": "Custom"
+    }
+  ]
+}
+{% endschema %}
+<section class="brand-bar-section" style="background-color: {{ section.settings.background_color }}; padding-top: {{ section.settings.padding_top }}px; padding-bottom: {{ section.settings.padding_bottom }}px;">
+  <div class="container">
+    <h2 style="color: {{ section.settings.heading_color }};">{{ section.settings.heading }}</h2>
+    
+    <div class="brand-bar" style="background: linear-gradient(270deg, {{ section.settings.gradient_start }}, {{ section.settings.gradient_end }}); background-size: 400% 400%; animation: gradientShift {{ section.settings.animation_duration }}s ease infinite; height: {{ section.settings.bar_height }}px;">
+      <div class="scrolling-wrapper" data-speed="{{ section.settings.scroll_speed }}" data-direction="{{ section.settings.scroll_direction }}">
+        <div class="brand-items">
+          {% if section.settings.brand_logo_1 %}
+            <div class="brand-item">
+              <img src="{{ section.settings.brand_logo_1 | img_url: 'medium' }}" alt="Brand 1" class="brand-logo" style="fill: {{ section.settings.logo_color }};">
+            </div>
+            <div class="star-item" style="font-size: {{ section.settings.star_size }}px; color: {{ section.settings.star_color }};">
+              &#10022;
+            </div>
+          {% endif %}
+          
+          {% if section.settings.brand_logo_2 %}
+            <div class="brand-item">
+              <img src="{{ section.settings.brand_logo_2 | img_url: 'medium' }}" alt="Brand 2" class="brand-logo" style="filter: {{ section.settings.logo_color }};">
+            </div>
+            <div class="star-item" style="font-size: {{ section.settings.star_size }}px; color: {{ section.settings.star_color }};">
+              &#10022;
+            </div>
+          {% endif %}
+          
+          {% if section.settings.brand_logo_3 %}
+            <div class="brand-item">
+              <img src="{{ section.settings.brand_logo_3 | img_url: 'medium' }}" alt="Brand 3" class="brand-logo" style="filter: {{ section.settings.logo_color }};">
+            </div>
+            <div class="star-item" style="font-size: {{ section.settings.star_size }}px; color: {{ section.settings.star_color }};">
+              &#10022;
+            </div>
+          {% endif %}
+          
+          {% if section.settings.brand_logo_4 %}
+            <div class="brand-item">
+              <img src="{{ section.settings.brand_logo_4 | img_url: 'medium' }}" alt="Brand 4" class="brand-logo" style="filter: {{ section.settings.logo_color }};">
+            </div>
+            <div class="star-item" style="font-size: {{ section.settings.star_size }}px; color: {{ section.settings.star_color }};">
+              &#10022;
+            </div>
+          {% endif %}
+          
+          {% if section.settings.brand_logo_5 %}
+            <div class="brand-item">
+              <img src="{{ section.settings.brand_logo_5 | img_url: 'medium' }}" alt="Brand 5" class="brand-logo" style="filter: {{ section.settings.logo_color }};">
+            </div>
+            <div class="star-item" style="font-size: {{ section.settings.star_size }}px; color: {{ section.settings.star_color }};">
+              &#10022;
+            </div>
+          {% endif %}
+          
+          {% if section.settings.brand_logo_6 %}
+            <div class="brand-item">
+              <img src="{{ section.settings.brand_logo_6 | img_url: 'medium' }}" alt="Brand 6" class="brand-logo" style="filter: {{ section.settings.logo_color }};">
+            </div>
+            <div class="star-item" style="font-size: {{ section.settings.star_size }}px; color: {{ section.settings.star_color }};">
+              &#10022;
+            </div>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+  </div>
+<style>
+  .brand-bar-section {
+    text-align: center;
+  }
+
+  .brand-bar-section h2 {
+    font-size: 2rem;
+    margin-bottom: 15px;
+  }
+
+  .brand-bar {
+    padding: 0;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+  }
+
+  .scrolling-wrapper {
+    display: flex;
+    overflow-x: hidden;
+    white-space: nowrap;
+    scroll-behavior: smooth;
+    padding: 10px 0;
+    animation: scroll {{ section.settings.scroll_speed }}s linear infinite;
+  }
+
+  .brand-items {
+    display: flex;
+    align-items: center;
+  }
+
+  .scrolling-wrapper:hover {
+    animation-play-state: paused;
+  }
+
+  .brand-logo {
+    max-height: {{ section.settings.image_max_height }}px;
+    width: auto;
+    object-fit: contain;
+    display: block;
+    margin: 0 auto;
+    padding: 0 10px;
+  }
+
+  .scrolling-wrapper[data-direction="right"] {
+    animation-direction: reverse;
+  }
+
+  .star-item {
+    padding: 0 15px;
+    display: flex;
+    align-items: center;
+  }
+
+  @keyframes scroll {
+    0% {
+      transform: translateX(100%);
+    }
+    100% {
+      transform: translateX(-100%);
+    }
+  }
+
+  @keyframes gradientShift {
+    0% {
+      background-position: 0% 50%;
+    }
+    100% {
+      background-position: 100% 50%;
+    }
+  }
+
+  @media screen and (max-width: 768px) {
+    .brand-bar {
+      height: 40px;
+    }
+
+    .brand-logo {
+      max-height: 30px;
+      padding: 0 8px;
+    }
+
+    .star-item {
+      font-size: 18px;
+      padding: 0 10px;
+    }
+  }
+</style>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    const scrollingWrapper = document.querySelector('.scrolling-wrapper');
+    const scrollSpeed = scrollingWrapper.getAttribute('data-speed') || 20;
+    const scrollDirection = scrollingWrapper.getAttribute('data-direction') || 'left';
+
+    scrollingWrapper.style.animationDuration = scrollSpeed + 's';
+
+    if (scrollDirection === 'left') {
+      scrollingWrapper.style.animationDirection = 'normal';
+    } else {
+      scrollingWrapper.style.animationDirection = 'reverse';
+    }
+  });
+</script>

@@ -1,0 +1,317 @@
+<section class="shrine-results-section">
+  <div class="container">
+    <div class="results-left">
+      {% if section.settings.left_heading != blank %}
+      <h2 style="color: {{ section.settings.left_heading_color }};">{{ section.settings.left_heading }}</h2>
+      {% endif %}
+      {% if section.settings.left_paragraph != blank %}
+      <p style="color: {{ section.settings.left_paragraph_color }};">{{ section.settings.left_paragraph }}</p>
+      {% endif %}
+    </div>
+    
+    <div class="results-right">
+      {% if section.settings.right_heading != blank %}
+      <h2 style="color: {{ section.settings.right_heading_color }};">{{ section.settings.right_heading }}</h2>
+      {% endif %}
+      <div class="results-list">
+        {% for i in (1..section.settings.number_of_results) %}
+        <div class="result-item">
+          {% assign progress_key = "progress_" | append: i %}
+          {% assign result_text_key = "result_text_" | append: i %}
+          {% assign result_image_key = "result_image_" | append: i %}
+          {% assign result_video_key = "result_video_" | append: i %}
+
+          <div class="circle-progress" style="border-color: {{ section.settings.progress_color }};">
+            <span>{{ section.settings[progress_key] }}%</span>
+          </div>
+          <p style="color: {{ section.settings.right_text_color }};">{{ section.settings[result_text_key] }}</p>
+
+          <!-- Display Video Shrine style if exists -->
+          {% if section.settings[result_video_key] != blank %}
+          <div class="shrine-video-container">
+            <video class="shrine-video" autoplay muted loop playsinline style="border-radius: 12px;">
+              <source src="{{ section.settings[result_video_key] }}" type="video/mp4">
+              Your browser does not support the video tag.
+            </video>
+          </div>
+          {% endif %}
+
+          <!-- Display Image if exists -->
+          {% if section.settings[result_image_key] != blank %}
+          <img src="{{ section.settings[result_image_key] }}" alt="Result Image" style="max-width: 100px; margin-left: 15px;">
+          {% endif %}
+        </div>
+        {% endfor %}
+      </div>
+      <p class="results-caption" style="color: {{ section.settings.caption_color }};">{{ section.settings.caption }}</p>
+    </div>
+  </div>
+</section>
+
+<style>
+  .shrine-results-section {
+    display: flex;
+    padding: 50px;
+    background-color: {{ section.settings.background_color }};
+    border: solid {{ section.settings.border_color }} {{ section.settings.border_thickness }}px;
+    margin-top: {{ section.settings.margin_top | times: 0.75 | round: 0 }}px;
+    margin-bottom: {{ section.settings.margin_bottom | times: 0.75 | round: 0 }}px;
+  }
+
+  .container {
+    display: flex;
+    justify-content: space-between;
+    width: 100%;
+  }
+
+  .results-left {
+    width: 45%;
+    text-align: left;
+  }
+
+  .results-right {
+    width: 45%;
+  }
+
+  .results-list {
+    margin-top: 20px;
+  }
+
+  .result-item {
+    display: flex;
+    align-items: center;
+    margin-bottom: 20px;
+    flex-direction: column;
+  }
+
+  .circle-progress {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    border: 6px solid;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 18px;
+    font-weight: bold;
+    margin-right: 15px;
+  }
+
+  .shrine-video-container {
+    margin-top: 15px;
+    width: 100%;
+    overflow: hidden;
+    position: relative;
+  }
+
+  .shrine-video {
+    width: 100%;
+    height: auto;
+    object-fit: cover;
+    border-radius: 12px;
+  }
+
+  .results-caption {
+    margin-top: 20px;
+    font-size: 14px;
+  }
+
+  /* Responsive */
+  @media (max-width: 768px) {
+    .container {
+      flex-direction: column;
+      text-align: center;
+    }
+
+    .results-left, .results-right {
+      width: 100%;
+    }
+
+    .result-item {
+      justify-content: center;
+    }
+  }
+</style>
+
+{% schema %}
+{
+  "name": "Shrine Results Section",
+  "settings": [
+    {
+      "type": "text",
+      "id": "left_heading",
+      "label": "Left Heading",
+      "default": "Results"
+    },
+    {
+      "type": "color",
+      "id": "left_heading_color",
+      "label": "Left Heading Color",
+      "default": "#000000"
+    },
+    {
+      "type": "textarea",
+      "id": "left_paragraph",
+      "label": "Left Paragraph",
+      "default": "Talk about results of your customers and how your product improved their life."
+    },
+    {
+      "type": "color",
+      "id": "left_paragraph_color",
+      "label": "Left Paragraph Color",
+      "default": "#000000"
+    },
+    {
+      "type": "text",
+      "id": "right_heading",
+      "label": "Right Heading",
+      "default": "Results heading"
+    },
+    {
+      "type": "color",
+      "id": "right_heading_color",
+      "label": "Right Heading Color",
+      "default": "#000000"
+    },
+    {
+      "type": "range",
+      "id": "number_of_results",
+      "label": "Number of Results",
+      "min": 1,
+      "max": 5,
+      "default": 3
+    },
+    {
+      "type": "text",
+      "id": "progress_1",
+      "label": "Progress for Result 1",
+      "default": "90"
+    },
+    {
+      "type": "text",
+      "id": "result_text_1",
+      "label": "Text for Result 1",
+      "default": "Noticed that this product has significantly improved their life."
+    },
+    {
+      "type": "image_picker",
+      "id": "result_image_1",
+      "label": "Image for Result 1"
+    },
+    {
+      "type": "url",
+      "id": "result_video_1",
+      "label": "Video for Result 1"
+    },
+    {
+      "type": "text",
+      "id": "progress_2",
+      "label": "Progress for Result 2",
+      "default": "90"
+    },
+    {
+      "type": "text",
+      "id": "result_text_2",
+      "label": "Text for Result 2",
+      "default": "Noticed that this product has significantly improved their life."
+    },
+    {
+      "type": "image_picker",
+      "id": "result_image_2",
+      "label": "Image for Result 2"
+    },
+    {
+      "type": "url",
+      "id": "result_video_2",
+      "label": "Video for Result 2"
+    },
+    {
+      "type": "text",
+      "id": "progress_3",
+      "label": "Progress for Result 3",
+      "default": "90"
+    },
+    {
+      "type": "text",
+      "id": "result_text_3",
+      "label": "Text for Result 3",
+      "default": "Noticed that this product has significantly improved their life."
+    },
+    {
+      "type": "image_picker",
+      "id": "result_image_3",
+      "label": "Image for Result 3"
+    },
+    {
+      "type": "url",
+      "id": "result_video_3",
+      "label": "Video for Result 3"
+    },
+    {
+      "type": "color",
+      "id": "progress_color",
+      "label": "Progress Circle Color",
+      "default": "#800080"
+    },
+    {
+      "type": "color",
+      "id": "right_text_color",
+      "label": "Right Text Color",
+      "default": "#000000"
+    },
+    {
+      "type": "textarea",
+      "id": "caption",
+      "label": "Caption Text",
+      "default": "Caption about the results and/or link for their proof."
+    },
+    {
+      "type": "color",
+      "id": "caption_color",
+      "label": "Caption Text Color",
+      "default": "#000000"
+    },
+    {
+      "type": "color",
+      "id": "background_color",
+      "label": "Background Color",
+      "default": "#FFFFFF"
+    },
+    {
+      "type": "color",
+      "id": "border_color",
+      "label": "Border Color",
+      "default": "#000000"
+    },
+    {
+      "type": "range",
+      "id": "border_thickness",
+      "min": 0,
+      "max": 20,
+      "step": 1,
+      "label": "Border Thickness",
+      "default": 1
+    },
+    {
+      "type": "range",
+      "id": "margin_top",
+      "min": 0,
+      "max": 100,
+      "step": 4,
+      "unit": "px",
+      "label": "Margin Top",
+      "default": 36
+    },
+    {
+      "type": "range",
+      "id": "margin_bottom",
+      "min": 0,
+      "max": 100,
+      "step": 4,
+      "unit": "px",
+      "label": "Margin Bottom",
+      "default": 36
+    }
+  ]
+}
+{% endschema %}
